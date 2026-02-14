@@ -1,0 +1,35 @@
+# Gradle files
+.gradle/
+
+
+# Build files
+**/build/
+
+# Local configuration
+local.properties
+/.idea/workspace.xml
+/.idea/libraries
+/.idea/modules.xml
+/.idea/caches
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+/.idea/deploymentTargetSelector.xml
+/.idea/markdown.xml
+/.idea/runConfigurations.xml
+*.iml
+
+# MacOS
+.DS_Store
+
+# Android Studio captures
+/captures
+
+# Native build outputs
+.externalNativeBuild
+.cxx
+
+# Kotlin/Jetpack Compose build caches
+.kotlin/
+.idea/gradle.xml
+.idea/compiler.xml
+.idea/dictionaries
