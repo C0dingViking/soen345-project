@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+          cache-dependency-path: |
+            build.gradle.kts
+            app/build.gradle.kts
+            settings.gradle.kts
+            gradle/libs.versions.toml
+
+      - name: Build Project
+        run: ./gradlew build --no-daemon
+
+      - name: Run Unit Tests
+        run: ./gradlew testDebugUnitTest --no-daemon

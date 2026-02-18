@@ -12,6 +12,8 @@ import org.junit.Assert.*
  * Instrumented test, which will execute on an Android device.
  *
  * See [testing documentation](http://d.android.com/tools/testing).
+ *
+ * This needs Junit 4 since it seems like it cannot yet integrate with Junit 5
  */
 @RunWith(AndroidJUnit4::class)
 class ExampleInstrumentedTest {
