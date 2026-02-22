@@ -1,6 +1,5 @@
 package com.spinachtesters.spinachbooking.ui.screens
 
-import android.R
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
@@ -150,7 +149,7 @@ fun LoginScreen() {
                         withStyle(style = SpanStyle(color = TextGreen)) {
                             append("No Account? ")
                         }
-                        withStyle(style = SpanStyle(color = PrimaryGreen)) { // change color here
+                        withStyle(style = SpanStyle(color = PrimaryGreen)) {
                             append("Register")
                         }
                     },

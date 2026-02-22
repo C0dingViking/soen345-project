@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.spinachtesters.spinachbooking.ui.components.TitleTopBar
 import com.spinachtesters.spinachbooking.ui.screens.LoginScreen
+import com.spinachtesters.spinachbooking.ui.screens.SignUpScreen
 import com.spinachtesters.spinachbooking.ui.theme.SpinachBookingTheme
 
 class MainActivity : ComponentActivity() {
@@ -21,7 +22,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SpinachBookingTheme {
-                LoginScreen()
+                //LoginScreen()
+                SignUpScreen() // don't have time to figure out routing right now
             }
         }
     }
