@@ -18,9 +18,10 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+    primary = PrimaryGreen,
+    secondary = SecondaryGreen,
+    tertiary = ButtonYellow,
+    background = Background
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
@@ -35,7 +36,7 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun SpinachBookingTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = false, //to only need to worry about light theme
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit

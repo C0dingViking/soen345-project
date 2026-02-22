@@ -11,6 +11,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.spinachtesters.spinachbooking.ui.components.TitleTopBar
+import com.spinachtesters.spinachbooking.ui.screens.LoginScreen
 import com.spinachtesters.spinachbooking.ui.theme.SpinachBookingTheme
 
 class MainActivity : ComponentActivity() {
@@ -19,12 +21,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SpinachBookingTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                LoginScreen()
             }
         }
     }
