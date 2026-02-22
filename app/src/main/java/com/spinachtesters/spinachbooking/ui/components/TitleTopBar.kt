@@ -3,6 +3,7 @@ package com.spinachtesters.spinachbooking.ui.components
 import com.spinachtesters.spinachbooking.R
 
 import androidx.compose.runtime.Composable
+import com.spinachtesters.spinachbooking.ui.theme.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
@@ -12,9 +13,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.*
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
 
 @OptIn(ExperimentalMaterial3Api::class)
+@Preview(widthDp = 360, heightDp = 120)
 @Composable
 fun TitleTopBar() {
     CenterAlignedTopAppBar(
@@ -32,7 +35,8 @@ fun TitleTopBar() {
                     fontSize = 30.sp,
                     textAlign = TextAlign.Center,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    color = PrimaryGreen
                 )
 
                 Spacer(modifier = Modifier.width(8.dp))

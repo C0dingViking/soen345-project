@@ -32,9 +32,14 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
+@Preview
 fun LoginScreen() {
     Scaffold(
         topBar = {TitleTopBar()},
@@ -140,12 +145,18 @@ fun LoginScreen() {
 
                 Spacer(modifier = Modifier.height(48.dp))
 
-                Text (
-                    "No Account? Register",
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(style = SpanStyle(color = TextGreen)) {
+                            append("No Account? ")
+                        }
+                        withStyle(style = SpanStyle(color = PrimaryGreen)) { // change color here
+                            append("Register")
+                        }
+                    },
                     fontFamily = PoppinsFontFamily,
                     fontWeight = FontWeight.Normal,
                     fontSize = 14.sp,
-                    color = TextGreen,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .padding(bottom = 24.dp)
