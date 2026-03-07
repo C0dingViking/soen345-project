@@ -16,7 +16,8 @@ data class EventDTO(
     var endTime: Long = 0L,     // stored as number of epoch millis
     var ticketPrice: Double = 0.0,
     var location: String = "",
-    var status: String = ""
+    var status: String = "",
+    var detailsId: String = ""
 )
 
 @RequiresApi(Build.VERSION_CODES.O)

@@ -1,7 +1,7 @@
 package com.spinachtesters.spinachbooking.domain.models
 
 data class SportDetails(
-    override val id: String = "",
+    override val id: String = "",   // FKEY to an EventDetails instance
     var sportType: String = "",
     var homeTeam: String = "",
     var visitingTeam: String = "",

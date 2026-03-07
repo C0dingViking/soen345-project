@@ -29,5 +29,6 @@ fun Event.toDTO() = EventDTO(
     endTime = this.endTime.atZone(ZoneId.of("UTC")).toInstant().toEpochMilli(),
     ticketPrice = this.ticketPrice,
     location = this.location,
-    status = this.status
+    status = this.status,
+    detailsId = this.details.id
 )
