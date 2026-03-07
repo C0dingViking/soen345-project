@@ -10,6 +10,7 @@ import io.mockk.just
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -53,7 +54,7 @@ class UserRepositoryTest {
 
         val result = repo.getById("test123")
 
-        Assertions.assertEquals(testUser, result)
+        assertEquals(testUser, result)
         coVerify(exactly = 1) { fakeSource.getById("test123") }
     }
 
@@ -76,7 +77,7 @@ class UserRepositoryTest {
 
         val result = repo.getAll()
 
-        Assertions.assertEquals(users, result)
+        assertEquals(users, result)
         coVerify(exactly = 1) { fakeSource.getAll() }
     }
 
@@ -87,7 +88,7 @@ class UserRepositoryTest {
 
         val result = repo.getAll()
 
-        Assertions.assertEquals(emptyList<User>(), result)
+        assertEquals(emptyList<User>(), result)
         coVerify(exactly = 1) { fakeSource.getAll() }
     }
 
