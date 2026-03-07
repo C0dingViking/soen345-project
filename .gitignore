@@ -32,3 +32,6 @@ local.properties
 .idea/gradle.xml
 .idea/compiler.xml
 .idea/dictionaries
+
+# authentication information
+google-services.json
