@@ -14,7 +14,7 @@ data class Booking (
 )
 
 @RequiresApi(Build.VERSION_CODES.O)
-fun Booking.ToDTO() = BookingDTO(
+fun Booking.toDTO() = BookingDTO(
     bookedBy = this.bookedBy,
     bookedFor = this.bookedFor,
     dateOfBooking = this.dateOfBooking.toEpochDay(),

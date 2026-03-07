@@ -1,11 +1,11 @@
-package com.spinachtesters.spinachbooking
+package com.spinachtesters.spinachbooking.data
 
 import com.spinachtesters.spinachbooking.data.models.EventDTO
 import com.spinachtesters.spinachbooking.data.models.toDomain
 import com.spinachtesters.spinachbooking.domain.models.Event
 import com.spinachtesters.spinachbooking.domain.models.EventDetails
 import com.spinachtesters.spinachbooking.domain.models.toDTO
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -58,15 +58,15 @@ class EventMappingTest {
 
         val dto = event.toDTO()
 
-        assertEquals(dto.id, "event123")
-        assertEquals(dto.title, "Concert")
-        assertEquals(dto.date, testDateAsLong)
-        assertEquals(dto.startTime, testStartAsLong)
-        assertEquals(dto.endTime, testEndAsLong)
-        assertEquals(dto.ticketPrice, 49.99)
-        assertEquals(dto.location, "Montreal")
-        assertEquals(dto.status, "active")
-        assertEquals(dto.detailsId, testDetails.id)
+        Assertions.assertEquals(dto.id, "event123")
+        Assertions.assertEquals(dto.title, "Concert")
+        Assertions.assertEquals(dto.date, testDateAsLong)
+        Assertions.assertEquals(dto.startTime, testStartAsLong)
+        Assertions.assertEquals(dto.endTime, testEndAsLong)
+        Assertions.assertEquals(dto.ticketPrice, 49.99)
+        Assertions.assertEquals(dto.location, "Montreal")
+        Assertions.assertEquals(dto.status, "active")
+        Assertions.assertEquals(dto.detailsId, testDetails.id)
     }
 
     @Test
@@ -86,15 +86,15 @@ class EventMappingTest {
 
         val event = dto.toDomain(testDetails)
 
-        assertEquals(event.id, "event123")
-        assertEquals(event.title, "Concert")
-        assertEquals(event.date, testDateAsObject)
-        assertEquals(event.startTime, testStartAsObject)
-        assertEquals(event.endTime, testEndAsObject)
-        assertEquals(event.ticketPrice, 49.99)
-        assertEquals(event.location, "Montreal")
-        assertEquals(event.status, "active")
-        assertEquals(event.details, testDetails)
+        Assertions.assertEquals(event.id, "event123")
+        Assertions.assertEquals(event.title, "Concert")
+        Assertions.assertEquals(event.date, testDateAsObject)
+        Assertions.assertEquals(event.startTime, testStartAsObject)
+        Assertions.assertEquals(event.endTime, testEndAsObject)
+        Assertions.assertEquals(event.ticketPrice, 49.99)
+        Assertions.assertEquals(event.location, "Montreal")
+        Assertions.assertEquals(event.status, "active")
+        Assertions.assertEquals(event.details, testDetails)
     }
 
     @Test
@@ -115,15 +115,15 @@ class EventMappingTest {
         val event = dto.toDomain(testDetails)
         val roundtripDTO = event.toDTO()
 
-        assertEquals(roundtripDTO.id, "event123")
-        assertEquals(roundtripDTO.title, "Concert")
-        assertEquals(roundtripDTO.date, testDateAsLong)
-        assertEquals(roundtripDTO.startTime, testStartAsLong)
-        assertEquals(roundtripDTO.endTime, testEndAsLong)
-        assertEquals(roundtripDTO.ticketPrice, 49.99)
-        assertEquals(roundtripDTO.location, "Montreal")
-        assertEquals(roundtripDTO.status, "active")
-        assertEquals(roundtripDTO.detailsId, testDetails.id)
+        Assertions.assertEquals(roundtripDTO.id, "event123")
+        Assertions.assertEquals(roundtripDTO.title, "Concert")
+        Assertions.assertEquals(roundtripDTO.date, testDateAsLong)
+        Assertions.assertEquals(roundtripDTO.startTime, testStartAsLong)
+        Assertions.assertEquals(roundtripDTO.endTime, testEndAsLong)
+        Assertions.assertEquals(roundtripDTO.ticketPrice, 49.99)
+        Assertions.assertEquals(roundtripDTO.location, "Montreal")
+        Assertions.assertEquals(roundtripDTO.status, "active")
+        Assertions.assertEquals(roundtripDTO.detailsId, testDetails.id)
     }
 
 }

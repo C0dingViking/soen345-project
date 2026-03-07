@@ -1,10 +1,10 @@
-package com.spinachtesters.spinachbooking
+package com.spinachtesters.spinachbooking.data
 
 import com.spinachtesters.spinachbooking.data.models.BookingDTO
 import com.spinachtesters.spinachbooking.data.models.toDomain
 import com.spinachtesters.spinachbooking.domain.models.Booking
-import com.spinachtesters.spinachbooking.domain.models.ToDTO
-import org.junit.jupiter.api.Assertions.assertEquals
+import com.spinachtesters.spinachbooking.domain.models.toDTO
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -30,12 +30,12 @@ class BookingMappingTest {
             status = "active"
         )
 
-        val dto = booking.ToDTO()
+        val dto = booking.toDTO()
 
-        assertEquals(dto.bookedBy, "bookedby123")
-        assertEquals(dto.bookedFor, "bookedfor123")
-        assertEquals(dto.dateOfBooking, testBookingDateAsLong)
-        assertEquals(dto.status, "active")
+        Assertions.assertEquals(dto.bookedBy, "bookedby123")
+        Assertions.assertEquals(dto.bookedFor, "bookedfor123")
+        Assertions.assertEquals(dto.dateOfBooking, testBookingDateAsLong)
+        Assertions.assertEquals(dto.status, "active")
     }
 
     @Test
@@ -50,10 +50,10 @@ class BookingMappingTest {
 
         val booking = dto.toDomain()
 
-        assertEquals(booking.bookedBy, "bookedby123")
-        assertEquals(booking.bookedFor, "bookedfor123")
-        assertEquals(booking.dateOfBooking, testBookingDateAsObject)
-        assertEquals(booking.status, "active")
+        Assertions.assertEquals(booking.bookedBy, "bookedby123")
+        Assertions.assertEquals(booking.bookedFor, "bookedfor123")
+        Assertions.assertEquals(booking.dateOfBooking, testBookingDateAsObject)
+        Assertions.assertEquals(booking.status, "active")
     }
 
     @Test
@@ -67,11 +67,11 @@ class BookingMappingTest {
         )
 
         val booking = dto.toDomain()
-        val roundtripDTO = booking.ToDTO()
+        val roundtripDTO = booking.toDTO()
 
-        assertEquals(roundtripDTO.bookedBy, "bookedby123")
-        assertEquals(roundtripDTO.bookedFor, "bookedfor123")
-        assertEquals(roundtripDTO.dateOfBooking, testBookingDateAsLong)
-        assertEquals(roundtripDTO.status, "active")
+        Assertions.assertEquals(roundtripDTO.bookedBy, "bookedby123")
+        Assertions.assertEquals(roundtripDTO.bookedFor, "bookedfor123")
+        Assertions.assertEquals(roundtripDTO.dateOfBooking, testBookingDateAsLong)
+        Assertions.assertEquals(roundtripDTO.status, "active")
     }
 }
