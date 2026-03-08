@@ -41,10 +41,17 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 
 @Composable
 @Preview
-fun SignUpScreen() {
+fun SignUpScreenPreview() {
+    SignUpScreen(navController = rememberNavController())
+}
+
+@Composable
+fun SignUpScreen(navController: NavController) {
     Scaffold(
         topBar = {TitleTopBar()},
         content = { innerPadding ->
@@ -275,6 +282,11 @@ fun SignUpScreen() {
                     modifier = Modifier
                         .padding(bottom = 24.dp)
                         .fillMaxWidth(0.85f)
+                        .clickable {
+                            navController.navigate("login") {
+                                popUpTo("signup") { inclusive = true }
+                            }
+                        }
                 )
             }
 
