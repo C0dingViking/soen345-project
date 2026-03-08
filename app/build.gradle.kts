@@ -14,7 +14,7 @@ android {
 
     defaultConfig {
         applicationId = "com.spinachtesters.spinachbooking"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -67,7 +67,7 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
 }
 
-tasks.withType<Test>().configureEach{
+tasks.withType<Test>().configureEach {
     useJUnitPlatform()
 
     maxHeapSize = "1G"
