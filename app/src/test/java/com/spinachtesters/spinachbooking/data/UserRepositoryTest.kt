@@ -29,10 +29,13 @@ class UserRepositoryTest {
 
         testUser = User(
             id = "test123",
+            fullName = "Test User",
             username = "username123",
-            password = "pass123",
-            email = "email123",
-            phoneNb = "phoneNb123",
+            passwordHash = "hash",
+            passwordSalt = "salt",
+            passwordIterations = 210000,
+            email = "email123@example.com",
+            phoneNb = "1234567890",
             isOrganizer = false
         )
     }
@@ -92,4 +95,43 @@ class UserRepositoryTest {
         coVerify(exactly = 1) { fakeSource.getAll() }
     }
 
+    @Test
+    @DisplayName("usernameExists returns true when username already exists")
+    fun usernameExistsReturnsTrue() = runTest {
+        coEvery { fakeSource.getAll() } returns listOf(testUser)
+
+        val result = repo.usernameExists("username123")
+
+        Assertions.assertTrue(result)
+    }
+
+    @Test
+    @DisplayName("emailExists returns false when email does not exist")
+    fun emailExistsReturnsFalse() = runTest {
+        coEvery { fakeSource.getAll() } returns listOf(testUser)
+
+        val result = repo.emailExists("new@example.com")
+
+        Assertions.assertFalse(result)
+    }
+
+    @Test
+    @DisplayName("findByLoginIdentifier returns user for matching username")
+    fun findByLoginIdentifierReturnsUser() = runTest {
+        coEvery { fakeSource.getAll() } returns listOf(testUser)
+
+        val result = repo.findByLoginIdentifier("username123")
+
+        assertEquals(testUser, result)
+    }
+
+    @Test
+    @DisplayName("findByLoginIdentifier returns null when no matches are found")
+    fun findByLoginIdentifierReturnsNull() = runTest {
+        coEvery { fakeSource.getAll() } returns listOf(testUser)
+
+        val result = repo.findByLoginIdentifier("unknown")
+
+        assertNull(result)
+    }
 }

@@ -17,12 +17,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -41,10 +44,36 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.spinachtesters.spinachbooking.ui.viewmodels.SignUpViewModel
 
 @Composable
 @Preview
-fun SignUpScreen() {
+fun SignUpScreenPreview() {
+    SignUpScreen(navController = rememberNavController())
+}
+
+@Composable
+fun SignUpScreen(
+    navController: NavController,
+    viewModel: SignUpViewModel = viewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    var selectedOption by remember { mutableStateOf("email") }
+    var passwordVisible by remember { mutableStateOf(false) }
+    var confirmPasswordVisible by remember { mutableStateOf(false) }
+
+    LaunchedEffect(uiState.isSuccess) {
+        if (uiState.isSuccess) {
+            viewModel.consumeSuccess()
+            navController.navigate("login") {
+                popUpTo("signup") { inclusive = true }
+            }
+        }
+    }
+
     Scaffold(
         topBar = {TitleTopBar()},
         content = { innerPadding ->
@@ -66,7 +95,7 @@ fun SignUpScreen() {
                     modifier = Modifier
                         .padding(vertical = 24.dp, )
                 )
-                var selectedOption by remember { mutableStateOf("email") }
+
                 Row(
                     modifier = Modifier
                         .padding(bottom = 24.dp)
@@ -80,10 +109,7 @@ fun SignUpScreen() {
                             .clickable { selectedOption = "email" }
                             .padding(horizontal = 16.dp, vertical = 6.dp)
                     ) {
-                        Text(
-                            "email",
-                            color = if (selectedOption == "email") Color.White else TextGreen
-                        )
+                        Text("email", color = if (selectedOption == "email") Color.White else TextGreen)
                     }
 
                     Spacer(modifier = Modifier.width(8.dp))
@@ -102,146 +128,191 @@ fun SignUpScreen() {
                     }
                 }
 
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
-
-                    var userContact by remember { mutableStateOf("") }
-
-                    OutlinedTextField(
-                        value = userContact,
-                        onValueChange = { newText -> userContact = newText },
-                        label = {
-                            Text(
-                                if (selectedOption == "email") "Email"
-                                else "Phone Number"
-                            )
-                        },
-                        placeholder = {
-                            Text(
-                                if (selectedOption == "email")
-                                    "Enter your email"
-                                else
-                                    "Enter your phone number"
-                            )
-                        },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(0.90f),
-                        colors = TextFieldDefaults.outlinedTextFieldColors(
-                            textColor = TextGreen,
-                            placeholderColor = Color(0xCC1F2A1F),
-                            backgroundColor = SecondaryGreen,
-                            cursorColor = PrimaryGreen,
-                            focusedBorderColor = PrimaryGreen,
-                            unfocusedBorderColor = SecondaryGreen
-                        ),
+                OutlinedTextField(
+                    value = if (selectedOption == "email") uiState.email else uiState.phoneNumber,
+                    onValueChange = {
+                        if (selectedOption == "email") viewModel.onEmailChanged(it) else viewModel.onPhoneNumberChanged(it)
+                    },
+                    label = { Text(if (selectedOption == "email") "Email" else "Phone Number") },
+                    placeholder = { Text(if (selectedOption == "email") "Enter your email" else "Enter your phone number") },
+                    singleLine = true,
+                    modifier = Modifier
+                        .fillMaxWidth(0.90f)
+                        .testTag("signup_contact_input"),
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        textColor = TextGreen,
+                        placeholderColor = Color(0xCC1F2A1F),
+                        backgroundColor = SecondaryGreen,
+                        cursorColor = PrimaryGreen,
+                        focusedBorderColor = PrimaryGreen,
+                        unfocusedBorderColor = SecondaryGreen
                     )
-                    var userFullName by remember { mutableStateOf("") }
+                )
 
-                    OutlinedTextField(
-                        value = userFullName,
-                        onValueChange = { newText -> userFullName = newText },
-                        label = { Text("Full Name") },
-                        placeholder = { Text(text = "Enter your First, Middle and Last Name") },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(0.90f),
-                        colors = TextFieldDefaults.outlinedTextFieldColors(
-                            textColor = TextGreen,
-                            placeholderColor = Color(0xCC1F2A1F),
-                            backgroundColor = SecondaryGreen,
-                            cursorColor = PrimaryGreen,
-                            focusedBorderColor = PrimaryGreen,
-                            unfocusedBorderColor = SecondaryGreen
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedTextField(
+                    value = uiState.fullName,
+                    onValueChange = viewModel::onFullNameChanged,
+                    label = { Text("Full Name") },
+                    placeholder = { Text("Enter your First, Middle and Last Name") },
+                    singleLine = true,
+                    modifier = Modifier
+                        .fillMaxWidth(0.90f)
+                        .testTag("signup_fullname_input"),
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        textColor = TextGreen,
+                        placeholderColor = Color(0xCC1F2A1F),
+                        backgroundColor = SecondaryGreen,
+                        cursorColor = PrimaryGreen,
+                        focusedBorderColor = PrimaryGreen,
+                        unfocusedBorderColor = SecondaryGreen
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedTextField(
+                    value = uiState.username,
+                    onValueChange = viewModel::onUsernameChanged,
+                    label = { Text("Username") },
+                    placeholder = { Text("Enter your username") },
+                    singleLine = true,
+                    modifier = Modifier
+                        .fillMaxWidth(0.90f)
+                        .testTag("signup_username_input"),
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        textColor = TextGreen,
+                        placeholderColor = Color(0xCC1F2A1F),
+                        backgroundColor = SecondaryGreen,
+                        cursorColor = PrimaryGreen,
+                        focusedBorderColor = PrimaryGreen,
+                        unfocusedBorderColor = SecondaryGreen
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedTextField(
+                    value = uiState.password,
+                    onValueChange = viewModel::onPasswordChanged,
+                    label = { Text("Password") },
+                    placeholder = { Text("Enter your password") },
+                    singleLine = true,
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    trailingIcon = {
+                        Icon(
+                            imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                            contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                            modifier = Modifier.clickable { passwordVisible = !passwordVisible }
                         )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth(0.90f)
+                        .testTag("signup_password_input"),
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        textColor = TextGreen,
+                        placeholderColor = Color(0xCC1F2A1F),
+                        backgroundColor = SecondaryGreen,
+                        cursorColor = PrimaryGreen,
+                        focusedBorderColor = PrimaryGreen,
+                        unfocusedBorderColor = SecondaryGreen
                     )
+                )
 
-                    var username by remember { mutableStateOf("") }
+                Spacer(modifier = Modifier.height(16.dp))
 
-                    OutlinedTextField(
-                        value = username,
-                        onValueChange = { newText -> username = newText },
-                        label = { Text("Username") },
-                        placeholder = { Text(text = "Enter your username") },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(0.90f),
-                        colors = TextFieldDefaults.outlinedTextFieldColors(
-                            textColor = TextGreen,
-                            placeholderColor = Color(0xCC1F2A1F),
-                            backgroundColor = SecondaryGreen,
-                            cursorColor = PrimaryGreen,
-                            focusedBorderColor = PrimaryGreen,
-                            unfocusedBorderColor = SecondaryGreen
+                OutlinedTextField(
+                    value = uiState.confirmPassword,
+                    onValueChange = viewModel::onConfirmPasswordChanged,
+                    label = { Text("Confirm Password") },
+                    placeholder = { Text("Enter your password again") },
+                    singleLine = true,
+                    visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    trailingIcon = {
+                        Icon(
+                            imageVector = if (confirmPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                            contentDescription = if (confirmPasswordVisible) "Hide password" else "Show password",
+                            modifier = Modifier.clickable { confirmPasswordVisible = !confirmPasswordVisible }
                         )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth(0.90f)
+                        .testTag("signup_confirm_password_input"),
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        textColor = TextGreen,
+                        placeholderColor = Color(0xCC1F2A1F),
+                        backgroundColor = SecondaryGreen,
+                        cursorColor = PrimaryGreen,
+                        focusedBorderColor = PrimaryGreen,
+                        unfocusedBorderColor = SecondaryGreen
                     )
+                )
 
-                    var password by remember { mutableStateOf("") }
-                    var passwordVisible by remember { mutableStateOf(false) }
+                Spacer(modifier = Modifier.height(28.dp))
 
-                    OutlinedTextField(
-                        value = password,
-                        onValueChange = { newText -> password = newText },
-                        label = { Text("Password") },
-                        placeholder = { Text("Enter your password") },
-                        singleLine = true,
-                        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                        trailingIcon = {
-                            val image =
-                                if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
-                            Icon(
-                                imageVector = image,
-                                contentDescription = if (passwordVisible) "Hide password" else "Show password",
-                                modifier = Modifier.clickable { passwordVisible = !passwordVisible }
-                            )
-                        },
-                        modifier = Modifier.fillMaxWidth(0.90f),
-                        colors = TextFieldDefaults.outlinedTextFieldColors(
-                            textColor = TextGreen,
-                            placeholderColor = Color(0xCC1F2A1F),
-                            backgroundColor = SecondaryGreen,
-                            cursorColor = PrimaryGreen,
-                            focusedBorderColor = PrimaryGreen,
-                            unfocusedBorderColor = SecondaryGreen
-                        )
+                uiState.errorMessage?.let { message ->
+                    Text(
+                        text = message,
+                        color = Color(0xFFB00020),
+                        fontFamily = PoppinsFontFamily,
+                        fontSize = 13.sp,
+                        modifier = Modifier.fillMaxWidth(0.90f)
                     )
-                    var secondPassword by remember { mutableStateOf("") }
-                    var secondPasswordVisible by remember { mutableStateOf(false) }
-
-                    OutlinedTextField(
-                        value = secondPassword,
-                        onValueChange = { newText -> secondPassword = newText },
-                        label = { Text("Confirm Password") },
-                        placeholder = { Text("Enter your password again") },
-                        singleLine = true,
-                        visualTransformation = if (secondPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                        trailingIcon = {
-                            val image =
-                                if (secondPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
-                            Icon(
-                                imageVector = image,
-                                contentDescription = if (secondPasswordVisible) "Hide password" else "Show password",
-                                modifier = Modifier.clickable {
-                                    secondPasswordVisible = !secondPasswordVisible
-                                }
-                            )
-                        },
-                        modifier = Modifier.fillMaxWidth(0.90f),
-                        colors = TextFieldDefaults.outlinedTextFieldColors(
-                            textColor = TextGreen,
-                            placeholderColor = Color(0xCC1F2A1F),
-                            backgroundColor = SecondaryGreen,
-                            cursorColor = PrimaryGreen,
-                            focusedBorderColor = PrimaryGreen,
-                            unfocusedBorderColor = SecondaryGreen
-                        )
-                    )
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
 
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(0.90f)
+                        .padding(bottom = 16.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .background(SecondaryGreen, RoundedCornerShape(50))
+                            .padding(4.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .width(120.dp)
+                                .clip(RoundedCornerShape(50))
+                                .background(if (!uiState.isOrganizer) PrimaryGreen else Color.Transparent)
+                                .clickable { viewModel.onIsOrganizerChanged(false) }
+                                .padding(horizontal = 16.dp, vertical = 6.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                "User",
+                                color = if (!uiState.isOrganizer) Color.White else TextGreen
+                            )
+                        }
 
-                Spacer(modifier = Modifier.height(72.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
 
-                Button (
-                    onClick = {},
-                    modifier = Modifier.fillMaxWidth(0.40f),
+                        Box(
+                            modifier = Modifier
+                                .width(120.dp)
+                                .clip(RoundedCornerShape(50))
+                                .background(if (uiState.isOrganizer) PrimaryGreen else Color.Transparent)
+                                .clickable { viewModel.onIsOrganizerChanged(true) }
+                                .padding(horizontal = 16.dp, vertical = 6.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                "Organizer",
+                                color = if (uiState.isOrganizer) Color.White else TextGreen
+                            )
+                        }
+                    }
+                }
+
+                Button(
+                    onClick = { viewModel.signUp(useEmail = selectedOption == "email") },
+                    enabled = !uiState.isLoading,
+                    modifier = Modifier
+                        .fillMaxWidth(0.40f)
+                        .testTag("signup_submit_button"),
                     colors = ButtonColors(
                         containerColor = ButtonYellow,
                         contentColor = TextGreen,
@@ -250,7 +321,7 @@ fun SignUpScreen() {
                     )
                 ) {
                     Text(
-                        "Sign up",
+                        if (uiState.isLoading) "Signing up..." else "Sign up",
                         fontFamily = PoppinsFontFamily,
                         fontWeight = FontWeight.Normal,
                         fontSize = 14.sp,
@@ -275,6 +346,11 @@ fun SignUpScreen() {
                     modifier = Modifier
                         .padding(bottom = 24.dp)
                         .fillMaxWidth(0.85f)
+                        .clickable {
+                            navController.navigate("login") {
+                                popUpTo("signup") { inclusive = true }
+                            }
+                        }
                 )
             }
 
