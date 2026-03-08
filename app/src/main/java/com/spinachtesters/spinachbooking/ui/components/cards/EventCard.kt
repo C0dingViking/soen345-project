@@ -44,12 +44,12 @@ fun EventCard(
 ) {
 
     Card(
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(12.dp),
         modifier = Modifier
             .width(180.dp)
             .padding(8.dp)
             .clickable { onClick() },
-        colors = CardDefaults.cardColors(containerColor = BackgroundGrey)
+        colors = CardDefaults.cardColors(containerColor = BackgroundGrey),
     ) {
 
         Column(
@@ -73,13 +73,11 @@ fun EventCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Date on the left
                 Text(
                     text = date,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Medium
                 )
 
-                // Title & Location on the right
                 Column(
                     horizontalAlignment = Alignment.End,
                     verticalArrangement = Arrangement.spacedBy(10.dp)
