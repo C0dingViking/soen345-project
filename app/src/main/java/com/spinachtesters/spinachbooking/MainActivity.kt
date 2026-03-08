@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.spinachtesters.spinachbooking.ui.components.TitleTopBar
+import com.spinachtesters.spinachbooking.ui.screens.HomeScreen
 import com.spinachtesters.spinachbooking.ui.screens.LoginScreen
 import com.spinachtesters.spinachbooking.ui.screens.SignUpScreen
 import com.spinachtesters.spinachbooking.ui.theme.SpinachBookingTheme
@@ -23,7 +24,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             SpinachBookingTheme {
                 //LoginScreen()
-                SignUpScreen() // don't have time to figure out routing right now
+                //SignUpScreen() // don't have time to figure out routing right now
+                HomeScreen()
             }
         }
     }

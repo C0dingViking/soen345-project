@@ -47,7 +47,6 @@ fun EventCard(
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier
             .width(180.dp)
-            .padding(8.dp)
             .clickable { onClick() },
         colors = CardDefaults.cardColors(containerColor = BackgroundGrey),
     ) {
