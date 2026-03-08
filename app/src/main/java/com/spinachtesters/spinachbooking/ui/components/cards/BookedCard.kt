@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import com.spinachtesters.spinachbooking.ui.theme.BackgroundGrey
@@ -61,8 +62,10 @@ fun BookedCard(
             Column(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
+                val displayTitle = if (title.length > 15) title.take(15) + "..." else title
+
                 Text(
-                    text = title,
+                    text = displayTitle,
                     fontWeight = FontWeight.Bold,
                     fontSize = 22.sp
                 )

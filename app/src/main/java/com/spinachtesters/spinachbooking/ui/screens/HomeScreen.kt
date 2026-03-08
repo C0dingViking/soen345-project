@@ -46,6 +46,7 @@ import com.spinachtesters.spinachbooking.domain.models.Event
 import com.spinachtesters.spinachbooking.domain.models.SportDetails
 import com.spinachtesters.spinachbooking.ui.components.cards.BookedCard
 import com.spinachtesters.spinachbooking.ui.components.cards.EventCard
+import com.spinachtesters.spinachbooking.ui.theme.Background
 import com.spinachtesters.spinachbooking.ui.theme.BackgroundGrey
 import com.spinachtesters.spinachbooking.ui.theme.SecondaryGreen
 import com.spinachtesters.spinachbooking.ui.theme.TextGreen
@@ -244,7 +245,7 @@ fun HomeScreen() {
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .background(MaterialTheme.colorScheme.background)
+            .background(Background)
     ) {
 
         HeaderSection()
