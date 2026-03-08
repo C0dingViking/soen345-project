@@ -202,9 +202,7 @@ fun HomeScreen(
             ) {
                 items(events) { event ->
                     EventCard(
-                        title = event.title,
-                        date = formatDate(event.date),
-                        location = event.location,
+                        event = event,
                         onClick = {}
                     )
                 }
@@ -289,6 +287,3 @@ fun formatTime(dateTime: LocalDateTime): String {
     val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
     return dateTime.format(timeFormatter)
 }
-
-
-
