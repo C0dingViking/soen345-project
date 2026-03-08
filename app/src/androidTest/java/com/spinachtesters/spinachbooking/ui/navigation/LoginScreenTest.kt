@@ -2,20 +2,23 @@ package com.spinachtesters.spinachbooking.ui.navigation
 
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.testing.TestNavHostController
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import androidx.test.ext.junit.runners.AndroidJUnit4
 
 @RunWith(AndroidJUnit4::class)
-class AuthNavigationTest {
+class LoginScreenTest {
 
     @get:Rule
     val composeRule = createAndroidComposeRule<ComponentActivity>()
@@ -42,13 +45,35 @@ class AuthNavigationTest {
     }
 
     @Test
-    fun clickingRegisterTextOnLogin_navigatesToSignUp() {
+    fun login_withBlankFields_showsCredentialsError() {
         composeRule.onNodeWithText("Have an account? Login").performClick()
-        composeRule.onNodeWithText("No Account? Register").performClick()
 
-        composeRule.runOnIdle {
-            assertEquals(Screen.SignUp.route, navController.currentBackStackEntry?.destination?.route)
-        }
+        clickLoginButton()
+
+        composeRule.onNodeWithText("Please provide your username/email/phone and password.").assertIsDisplayed()
+    }
+
+    @Test
+    fun login_withOnlyIdentifier_showsCredentialsError() {
+        composeRule.onNodeWithText("Have an account? Login").performClick()
+        composeRule.onNodeWithTag("login_identifier_input").performTextInput("janedoe")
+
+        clickLoginButton()
+
+        composeRule.onNodeWithText("Please provide your username/email/phone and password.").assertIsDisplayed()
+    }
+
+    @Test
+    fun login_withOnlyPassword_showsCredentialsError() {
+        composeRule.onNodeWithText("Have an account? Login").performClick()
+        composeRule.onNodeWithTag("login_password_input").performTextInput("StrongPass123!")
+
+        clickLoginButton()
+
+        composeRule.onNodeWithText("Please provide your username/email/phone and password.").assertIsDisplayed()
+    }
+
+    private fun clickLoginButton() {
+        composeRule.onNodeWithTag("login_submit_button").performClick()
     }
 }
-
