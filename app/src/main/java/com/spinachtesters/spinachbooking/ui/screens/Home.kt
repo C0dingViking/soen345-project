@@ -53,6 +53,11 @@ import com.spinachtesters.spinachbooking.ui.theme.TextGreen
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.spinachtesters.spinachbooking.ui.viewmodels.SignUpViewModel
+
 
 val sampleEvents = listOf(
     Event(
@@ -118,6 +123,14 @@ val sampleBookings = listOf(
 @Composable
 @Preview
 fun HomeScreen() {
+    HomeScreen(navController = rememberNavController())
+}
+
+@Composable
+fun HomeScreen(
+    navController: NavController,
+    viewModel: SignUpViewModel = viewModel()
+) {
     @Composable
     fun HeaderSection() {
         Box(
