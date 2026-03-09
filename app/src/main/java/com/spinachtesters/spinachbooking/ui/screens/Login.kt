@@ -58,7 +58,7 @@ fun LoginScreen(
     var passwordVisible by remember { mutableStateOf(false) }
 
     Scaffold(
-        topBar = {TitleTopBar()},
+        topBar = { TitleTopBar() },
         content = { innerPadding ->
             Column(
                 modifier = Modifier
@@ -75,10 +75,10 @@ fun LoginScreen(
                     fontSize = 24.sp,
                     color = TextGreen,
                     modifier = Modifier
-                        .padding(vertical = 24.dp, )
+                        .padding(vertical = 24.dp)
                 )
 
-                Text (
+                Text(
                     "You can login with username, email, or phone number",
                     fontFamily = PoppinsFontFamily,
                     fontWeight = FontWeight.Normal,
@@ -118,7 +118,8 @@ fun LoginScreen(
                     singleLine = true,
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     trailingIcon = {
-                        val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                        val image =
+                            if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
                         Icon(
                             imageVector = image,
                             contentDescription = if (passwordVisible) "Hide password" else "Show password",
@@ -160,7 +161,12 @@ fun LoginScreen(
                         modifier = Modifier.fillMaxWidth(0.90f)
                     )
                     Spacer(modifier = Modifier.height(12.dp))
+
+                    navController.navigate("home") {
+                        popUpTo("login") { inclusive = true }
+                    }
                 }
+
 
                 Spacer(modifier = Modifier.height(40.dp))
 
