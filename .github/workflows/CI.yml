@@ -39,3 +39,20 @@ jobs:
 
       - name: Run Unit Tests
         run: ./gradlew testDebugUnitTest --no-daemon
+
+      - name: Publish Test Results
+        uses: dorny-test-reporter@1
+        if: always() # ensures the report is generated even if the tests fail
+        with:
+          name: Unit Tests Report
+          path: app/buil/test-results/testDebugUnitTest/*.xml
+          reporter: java-junit
+
+      - name: Generate JaCoCo Coverage Report
+        run: ./gradlew jacocoTestReport --no-daemon
+
+      - name: Publish JaCoCo Report in PR comments
+        uses: MoranaApps/jacoco-report@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          paths: app/build/reports/jacoco/jacocoUnitTestReport/xml/jacocoUnitTestReport.xml
