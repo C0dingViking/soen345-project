@@ -41,7 +41,7 @@ jobs:
         run: ./gradlew testDebugUnitTest --no-daemon
 
       - name: Publish Test Results
-        uses: dorny/test-reporter@2
+        uses: dorny/test-reporter@v1
         if: ${{ !cancelled() }}  # ensures the report is generated even if the tests fail
         with:
           name: Unit Tests Report
