@@ -45,7 +45,7 @@ jobs:
         if: ${{ !cancelled() }}  # ensures the report is generated even if the tests fail
         with:
           name: Unit Tests Report
-          path: app/buil/test-results/testDebugUnitTest/*.xml
+          path: app/build/test-results/testDebugUnitTest/*.xml
           reporter: java-junit
 
       - name: Generate JaCoCo Coverage Report
