@@ -64,4 +64,4 @@ jobs:
         uses: MoranaApps/jacoco-report@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          paths: app/build/reports/jacoco/jacocoUnitTestReport/xml/jacocoUnitTestReport.xml
+          paths: app/build/reports/jacoco/jacocoUnitTestReport/jacocoUnitTestReport.xml
