@@ -92,26 +92,7 @@ jacoco {
     toolVersion = "0.8.10"
 }
 
-tasks.register<JacocoReport>("jacocoUnitTestReport") {
-//    group = "Reporting"
-//    description = "Generates JaCoCo coverage report after unit tests"
-//
-//    reports {
-//        html.required.set(true)
-//        xml.required.set(true)
-//        csv.required.set(false)
-//    }
-//
-//    sourceDirectories.setFrom(layout.projectDirectory.dir("src/main/java"))
-//    classDirectories.setFrom(files(
-//        fileTree(layout.buildDirectory.dir("intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes")) {
-//            exclude(exclusions)
-//        }
-//    ))
-//    executionData.setFrom(files(
-//        fileTree(layout.buildDirectory) { include(listOf("**/*.exec", "**/*.ec")) }
-//    ))
-}
+tasks.register<JacocoReport>("jacocoTestReport")
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
