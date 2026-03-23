@@ -54,11 +54,12 @@ jobs:
           reporter: java-junit
 
       - name: Generate JaCoCo Coverage Report
-        run: ./gradlew jacocoTestReport --no-daemon
+        run: ./gradlew jacocoTestReport --no-daemon --info
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           files: app/build/reports/jacoco/jacocoUnitTestReport/jacocoUnitTestReport.xml
           fail_ci_if_error: true
           verbose: true
