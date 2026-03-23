@@ -56,12 +56,9 @@ jobs:
       - name: Generate JaCoCo Coverage Report
         run: ./gradlew jacocoTestReport --no-daemon
 
-      - uses: actions/setup-python@v5.1.1
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
         with:
-          python-version: '3.12'
-
-      - name: Publish JaCoCo Report in PR comments
-        uses: MoranaApps/jacoco-report@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          paths: app/build/reports/jacoco/jacocoUnitTestReport/jacocoUnitTestReport.xml
+          files: app/build/reports/jacoco/jacocoUnitTestReport/jacocoUnitTestReport.xml
+          fail_ci_if_error: true
+          verbose: true
