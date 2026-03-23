@@ -6,6 +6,11 @@ on:
       - main
     types: [opened, synchronize, reopened]
 
+
+permissions:
+  contents: read
+  checks: write
+
 jobs:
   test:
     name: Test
@@ -38,4 +43,12 @@ jobs:
         run: ./gradlew build --no-daemon
 
       - name: Run Unit Tests
-        run: ./gradlew testDebugUnitTest --no-daemon
+        run: ./gradlew testDebugUnitTest --no-daemon --info
+
+      - name: Publish Test Results
+        uses: dorny/test-reporter@v1
+        if: ${{ !cancelled() }}  # ensures the report is generated even if the tests fail
+        with:
+          name: Unit Tests Report
+          path: app/build/test-results/testDebugUnitTest/*.xml
+          reporter: java-junit
