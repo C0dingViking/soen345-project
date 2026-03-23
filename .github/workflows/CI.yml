@@ -45,9 +45,6 @@ jobs:
       - name: Run Unit Tests
         run: ./gradlew testDebugUnitTest --no-daemon --info
 
-      - name: Generate JaCoCo Coverage Report
-        run: ./gradlew jacocoTestReport --no-daemon --info
-
       - name: Publish Test Results
         uses: dorny/test-reporter@v1
         if: ${{ !cancelled() }}  # ensures the report is generated even if the tests fail
@@ -55,11 +52,3 @@ jobs:
           name: Unit Tests Report
           path: app/build/test-results/testDebugUnitTest/*.xml
           reporter: java-junit
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: app/build/reports/jacoco/jacocoUnitTestReport/jacocoUnitTestReport.xml
-          fail_ci_if_error: true
-          verbose: true
