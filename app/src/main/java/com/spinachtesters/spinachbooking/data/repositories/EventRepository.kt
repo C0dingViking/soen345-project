@@ -64,6 +64,26 @@ class EventRepository(
             val concreteDetails = generateConcreteDetails(dto.detailsId) ?: return@mapNotNull null
             dto.toDomain(concreteDetails)
         }
+    }
 
+    suspend fun deleteById(id: String) {
+        val eventDto = eventSrc.getById(id) ?: return
+        deleteConcreteDetails(eventDto.detailsId)
+
+        eventSrc.deleteById(id)
+    }
+
+    private suspend fun deleteConcreteDetails(detailsId: String) {
+        val eventDetailsDTO = detailsSrc.getById(detailsId) ?: return
+
+        when (eventDetailsDTO.detailType) {
+            "sport" -> sportSrc.deleteById(eventDetailsDTO.id)
+            "film" -> filmSrc.deleteById(eventDetailsDTO.id)
+            "theater" -> theaterSrc.deleteById(eventDetailsDTO.id)
+            "concert" -> concertSrc.deleteById(eventDetailsDTO.id)
+            else -> null
+        }
+
+        detailsSrc.deleteById(eventDetailsDTO.id)
     }
 }

@@ -1,5 +1,7 @@
 package com.spinachtesters.spinachbooking.domain.models
 
+import com.google.firebase.database.PropertyName
+
 data class User(
     val id: String = "",
     val fullName: String = "",
@@ -9,5 +11,5 @@ data class User(
     val passwordIterations: Int = 0,
     val email: String = "",
     val phoneNb: String = "",
-    val isOrganizer: Boolean = false
+    val organizer: Boolean = false
 ) {}

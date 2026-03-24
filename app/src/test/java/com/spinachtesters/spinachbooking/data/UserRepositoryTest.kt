@@ -36,7 +36,7 @@ class UserRepositoryTest {
             passwordIterations = 210000,
             email = "email123@example.com",
             phoneNb = "1234567890",
-            isOrganizer = false
+            organizer = false
         )
     }
 
