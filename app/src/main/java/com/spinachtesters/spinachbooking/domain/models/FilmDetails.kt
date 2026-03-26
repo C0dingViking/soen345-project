@@ -6,4 +6,6 @@ data class FilmDetails(
     var runtimeMin: Int = 0,
     var rating: Int = 0,
     var genre: String = ""
-) : EventDetails(id, "film") {}
+) : EventDetails(id, "film") {
+    override fun copyWithId(newId: String) = copy(id = newId)
+}

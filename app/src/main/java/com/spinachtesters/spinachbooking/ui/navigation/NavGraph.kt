@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.spinachtesters.spinachbooking.ui.screens.AddEventScreen
 import com.spinachtesters.spinachbooking.ui.screens.HomeScreen
 import com.spinachtesters.spinachbooking.ui.screens.LoginScreen
 import com.spinachtesters.spinachbooking.ui.screens.ManageEventsScreen
@@ -14,6 +15,7 @@ sealed class Screen(val route: String) {
     object SignUp : Screen("signup")
     object Home : Screen("home")
     object ManageEvents: Screen("manage_events")
+    object AddEvent: Screen("add_event")
 }
 
 @Composable
@@ -33,6 +35,9 @@ fun NavGraph(navController: NavHostController) {
         }
         composable(route = Screen.ManageEvents.route) {
             ManageEventsScreen(navController);
+        }
+        composable(route = Screen.AddEvent.route) {
+            AddEventScreen(navController);
         }
     }
 }
