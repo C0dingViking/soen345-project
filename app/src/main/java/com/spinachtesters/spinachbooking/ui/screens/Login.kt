@@ -162,8 +162,14 @@ fun LoginScreen(
                     )
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    navController.navigate("home") {
-                        popUpTo("login") { inclusive = true }
+                    if (uiState.isOrganizer) {
+                        navController.navigate("manage_events") {
+                            popUpTo("login") { inclusive = true }
+                        }
+                    } else {
+                        navController.navigate("home") {
+                            popUpTo("login") { inclusive = true }
+                        }
                     }
                 }
 

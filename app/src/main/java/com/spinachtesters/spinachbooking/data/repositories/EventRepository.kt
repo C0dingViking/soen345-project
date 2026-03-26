@@ -12,10 +12,11 @@ import com.spinachtesters.spinachbooking.domain.models.EventDetails
 import com.spinachtesters.spinachbooking.domain.models.FilmDetails
 import com.spinachtesters.spinachbooking.domain.models.SportDetails
 import com.spinachtesters.spinachbooking.domain.models.TheaterDetails
+import com.spinachtesters.spinachbooking.domain.models.User
 import com.spinachtesters.spinachbooking.domain.models.toDTO
 import com.spinachtesters.spinachbooking.domain.models.toGenericDTO
+import java.util.UUID
 
-@RequiresApi(Build.VERSION_CODES.O)
 class EventRepository(
     private val eventSrc : FirebaseRepository<EventDTO> = FirebaseRepository(EventDTO::class.java, RootDatabaseProvider.events),
     private val detailsSrc : FirebaseRepository<EventDetailsDTO> = FirebaseRepository(EventDetailsDTO::class.java, RootDatabaseProvider.eventDetails),
@@ -34,6 +35,16 @@ class EventRepository(
             is TheaterDetails -> theaterSrc.save(details.id, details)
             is ConcertDetails -> concertSrc.save(details.id, details)
         }
+    }
+
+    suspend fun create(event: Event): Event {
+        val id = event.id.ifBlank { UUID.randomUUID().toString() }
+        val detailsId = event.details.id.ifBlank { UUID.randomUUID().toString() }
+
+        val savedEvent = event.copy(id = id, details = event.details.copyWithId(detailsId))
+
+        save(id, savedEvent)
+        return savedEvent
     }
 
     private suspend fun generateConcreteDetails(detailsId: String): EventDetails? {
@@ -64,6 +75,26 @@ class EventRepository(
             val concreteDetails = generateConcreteDetails(dto.detailsId) ?: return@mapNotNull null
             dto.toDomain(concreteDetails)
         }
+    }
 
+    suspend fun deleteById(id: String) {
+        val eventDto = eventSrc.getById(id) ?: return
+        deleteConcreteDetails(eventDto.detailsId)
+
+        eventSrc.deleteById(id)
+    }
+
+    private suspend fun deleteConcreteDetails(detailsId: String) {
+        val eventDetailsDTO = detailsSrc.getById(detailsId) ?: return
+
+        when (eventDetailsDTO.detailType) {
+            "sport" -> sportSrc.deleteById(eventDetailsDTO.id)
+            "film" -> filmSrc.deleteById(eventDetailsDTO.id)
+            "theater" -> theaterSrc.deleteById(eventDetailsDTO.id)
+            "concert" -> concertSrc.deleteById(eventDetailsDTO.id)
+            else -> null
+        }
+
+        detailsSrc.deleteById(eventDetailsDTO.id)
     }
 }

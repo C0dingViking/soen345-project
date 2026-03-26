@@ -81,7 +81,7 @@ class SignUpViewModel(
                     passwordIterations = hashResult.iterations,
                     email = if (useEmail) state.email.trim() else "",
                     phoneNb = if (useEmail) "" else state.phoneNumber.trim(),
-                    isOrganizer = state.isOrganizer
+                    organizer = state.isOrganizer
                 )
 
                 userRepository.create(newUser)

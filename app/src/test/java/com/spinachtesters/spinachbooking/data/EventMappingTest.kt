@@ -16,7 +16,9 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 
 class EventMappingTest {
-    data class FakeEventDetails(override val id: String) : EventDetails(id, "test")
+    data class FakeEventDetails(override val id: String) : EventDetails(id, "test") {
+        override fun copyWithId(newId: String) = copy(id = newId)
+    }
 
     private lateinit var testDetails: FakeEventDetails
     private lateinit var testDateAsObject: LocalDate

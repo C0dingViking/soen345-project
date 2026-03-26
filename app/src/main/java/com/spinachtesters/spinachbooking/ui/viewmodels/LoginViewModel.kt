@@ -16,7 +16,8 @@ data class LoginUiState(
     val password: String = "",
     val isLoading: Boolean = false,
     val isAuthenticated: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val isOrganizer: Boolean = false
 )
 
 class LoginViewModel(
@@ -68,7 +69,8 @@ class LoginViewModel(
                         password = "",
                         isLoading = false,
                         isAuthenticated = true,
-                        errorMessage = null
+                        errorMessage = null,
+                        isOrganizer = user.organizer
                     )
                 }
             } catch (_: Exception) {

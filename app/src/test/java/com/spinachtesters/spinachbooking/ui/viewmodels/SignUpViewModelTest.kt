@@ -94,7 +94,7 @@ class SignUpViewModelTest {
         viewModel.signUp(useEmail = true)
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { userRepository.create(match { it.isOrganizer }) }
+        coVerify(exactly = 1) { userRepository.create(match { it.organizer }) }
         assertTrue(viewModel.uiState.value.isSuccess)
     }
 }
