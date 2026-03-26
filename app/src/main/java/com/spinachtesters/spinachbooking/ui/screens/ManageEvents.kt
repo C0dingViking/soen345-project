@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -26,6 +27,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,6 +41,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.spinachtesters.spinachbooking.domain.models.Event
 import com.spinachtesters.spinachbooking.ui.components.MinimalTopBar
 import com.spinachtesters.spinachbooking.ui.components.cards.EditableEventCard
 import com.spinachtesters.spinachbooking.ui.theme.PoppinsFontFamily
@@ -54,6 +59,7 @@ fun ManageEventsScreen(
     viewModel: ManageEventsViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var eventToDelete by remember { mutableStateOf<Event?>(null) }
 
     // automatically reloads the events whenever navigating to this page (even if not recomposed)
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -118,7 +124,7 @@ fun ManageEventsScreen(
                             items(uiState.events!!) { event ->
                                 EditableEventCard(
                                     subject = event,
-                                    clickDeleteCallback = { viewModel.deleteEvent(event) }
+                                    clickDeleteCallback = { eventToDelete = event }
                                 )
                             }
                         }
@@ -152,6 +158,29 @@ fun ManageEventsScreen(
                     }
                 }
             }
+            if (eventToDelete != null) {
+                AlertDialog(
+                    onDismissRequest = { eventToDelete = null },
+                    title = { Text("Delete Event") },
+                    text = { Text("Are you sure you want to delete this event?") },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                viewModel.deleteEvent(eventToDelete!!)
+                                eventToDelete = null
+                            }
+                        ) {
+                            Text("Delete")
+                        }
+                    },
+                    dismissButton = {
+                        Button(onClick = { eventToDelete = null }) {
+                            Text("Cancel")
+                        }
+                    }
+                )
+            }
+
         }
     )
 }
