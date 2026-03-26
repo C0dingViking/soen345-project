@@ -104,7 +104,7 @@ fun AddEventScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Add Event",
+                        text = "Add New Event",
                         fontFamily = PoppinsFontFamily,
                         fontSize = 20.sp,
                         color = Color.White,
@@ -119,7 +119,7 @@ fun AddEventScreen(
                     modifier = Modifier.fillMaxWidth().fillMaxHeight(0.75f)
                 ) {
                     LazyColumn(
-                        modifier = Modifier.fillMaxSize().padding(8.dp),
+                        modifier = Modifier.fillMaxSize().padding(8.dp).testTag("form"),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
@@ -197,6 +197,7 @@ fun AddEventScreen(
                             ) {
                                 DateSelector(
                                     "Event Date",
+                                    "date",
                                     uiState.date,
                                     viewModel::onEventDateChanged
                                 )
@@ -210,6 +211,7 @@ fun AddEventScreen(
                                 Box(modifier = Modifier.weight(1f)) {
                                     TimeSelector(
                                         "Time Start",
+                                        "timeStart",
                                         uiState.timeStart,
                                         viewModel::onTimeStartChanged
                                     )
@@ -218,10 +220,10 @@ fun AddEventScreen(
                                 Box(modifier = Modifier.weight(1f)) {
                                     TimeSelector(
                                         "Time End",
+                                        "timeEnd",
                                         uiState.timeEnd,
                                         viewModel::onTimeEndChanged
                                     )
-
                                 }
                             }
                         }

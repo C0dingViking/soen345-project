@@ -19,6 +19,7 @@ import java.util.Calendar
 @Composable
 fun DateSelector(
     label: String = "",
+    key: String = "",
     selectedDate: String = "",
     onDateSelected: (String) -> Unit
 ) {
@@ -49,7 +50,7 @@ fun DateSelector(
             label = { Text(label) },
             singleLine = true,
             enabled = false,
-            modifier = Modifier.fillMaxWidth().testTag("create_dateSelect_input"),
+            modifier = Modifier.fillMaxWidth().testTag("create_${key}_input"),
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 disabledTextColor = TextGreen,
                 disabledPlaceholderColor = Color(0xCC1F2A1F),

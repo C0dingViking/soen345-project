@@ -19,6 +19,7 @@ import java.util.Calendar
 @Composable
 fun TimeSelector(
     label: String,
+    key: String,
     selectedTime: String,
     onTimeSelected: (String) -> Unit
 ) {
@@ -51,7 +52,7 @@ fun TimeSelector(
             singleLine = true,
             enabled = false,
             modifier = Modifier
-                .fillMaxWidth().testTag("create_timeSelect_input"),
+                .fillMaxWidth().testTag("create_${key}_input"),
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 disabledTextColor = TextGreen,
                 disabledPlaceholderColor = Color(0xCC1F2A1F),
