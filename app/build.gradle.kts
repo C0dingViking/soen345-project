@@ -86,6 +86,9 @@ dependencies {
     implementation("com.google.firebase:firebase-database")
     testImplementation("io.mockk:mockk:1.14.9")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+    androidTestImplementation(libs.androidx.espresso.core.v361)
+    androidTestImplementation(libs.androidx.runner)
+    androidTestImplementation(libs.androidx.rules)
 }
 
 jacoco {

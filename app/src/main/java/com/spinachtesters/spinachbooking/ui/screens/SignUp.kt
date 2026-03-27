@@ -351,6 +351,7 @@ fun SignUpScreen(
                                 popUpTo("signup") { inclusive = true }
                             }
                         }
+                        .testTag("login_toggle")
                 )
             }
 
