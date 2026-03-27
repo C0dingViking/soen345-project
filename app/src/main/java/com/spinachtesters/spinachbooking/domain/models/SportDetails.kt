@@ -6,4 +6,6 @@ data class SportDetails(
     var homeTeam: String = "",
     var visitingTeam: String = "",
     var league: String = ""
-) : EventDetails(id, "sport") {}
+) : EventDetails(id, "sport") {
+    override fun copyWithId(newId: String) = copy(id = newId)
+}

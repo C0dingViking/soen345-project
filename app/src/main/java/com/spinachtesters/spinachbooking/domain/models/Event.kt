@@ -7,7 +7,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 
-@RequiresApi(Build.VERSION_CODES.O)
 data class Event (
     val id: String = "",
     val title: String = "",
@@ -20,7 +19,6 @@ data class Event (
     val details: EventDetails
 )
 
-@RequiresApi(Build.VERSION_CODES.O)
 fun Event.toDTO() = EventDTO(
     id = this.id,
     title = this.title,

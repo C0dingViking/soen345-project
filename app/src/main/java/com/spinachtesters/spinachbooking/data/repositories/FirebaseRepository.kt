@@ -20,4 +20,8 @@ class FirebaseRepository<T : Any>(
         val snapshot = ref.get().await()
         return snapshot.children.mapNotNull { it.getValue(classType) }
     }
+
+    suspend fun deleteById(id: String) {
+        ref.child(id).removeValue().await()
+    }
 }

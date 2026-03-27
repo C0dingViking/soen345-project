@@ -182,4 +182,44 @@ class EventRepositoryTest {
         assertEquals(emptyList<Event>(), result)
         coVerify(exactly = 1) { fakeEventSrc.getAll() }
     }
+
+    @Test
+    @DisplayName("deleteById deletes event, generic details, and concrete details")
+    fun deleteByIdDeletesEverything() = runTest {
+        coEvery { fakeEventSrc.getById("testevent123") } returns testEventDTO
+        coEvery { fakeDetailsSrc.getById("testdetails123") } returns testEventDetailsDTO
+        coEvery { fakeFilmSrc.deleteById("testdetails123") } just Runs
+        coEvery { fakeDetailsSrc.deleteById("testdetails123") } just Runs
+        coEvery { fakeEventSrc.deleteById("testevent123") } just Runs
+
+        repo.deleteById("testevent123")
+
+        coVerify(exactly = 1) { fakeEventSrc.getById("testevent123") }
+        coVerify(exactly = 1) { fakeDetailsSrc.getById("testdetails123") }
+
+        coVerify(exactly = 1) { fakeFilmSrc.deleteById("testdetails123") }
+        coVerify(exactly = 1) { fakeDetailsSrc.deleteById("testdetails123") }
+        coVerify(exactly = 1) { fakeEventSrc.deleteById("testevent123") }
+
+        coVerify(exactly = 0) { fakeSportSrc.deleteById(any()) }
+        coVerify(exactly = 0) { fakeTheaterSrc.deleteById(any()) }
+        coVerify(exactly = 0) { fakeConcertSrc.deleteById(any()) }
+    }
+
+    @Test
+    @DisplayName("deleteById does nothing when event does not exist")
+    fun deleteByIdDoesNothingWhenEventMissing() = runTest {
+        coEvery { fakeEventSrc.getById("missing") } returns null
+
+        repo.deleteById("missing")
+
+        coVerify(exactly = 1) { fakeEventSrc.getById("missing") }
+        coVerify(exactly = 0) { fakeEventSrc.deleteById(any()) }
+        coVerify(exactly = 0) { fakeDetailsSrc.getById(any()) }
+        coVerify(exactly = 0) { fakeDetailsSrc.deleteById(any()) }
+        coVerify(exactly = 0) { fakeFilmSrc.deleteById(any()) }
+        coVerify(exactly = 0) { fakeSportSrc.deleteById(any()) }
+        coVerify(exactly = 0) { fakeTheaterSrc.deleteById(any()) }
+        coVerify(exactly = 0) { fakeConcertSrc.deleteById(any()) }
+    }
 }

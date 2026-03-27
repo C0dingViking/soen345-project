@@ -5,4 +5,6 @@ data class TheaterDetails(
     val writer: String = "",
     val genre: String = "",
     val durationMin: Int = 0
-) : EventDetails(id, "theater") {}
+) : EventDetails(id, "theater") {
+    override fun copyWithId(newId: String) = copy(id = newId)
+}
