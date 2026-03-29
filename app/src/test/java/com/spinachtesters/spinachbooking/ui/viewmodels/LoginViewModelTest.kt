@@ -1,6 +1,7 @@
 package com.spinachtesters.spinachbooking.ui.viewmodels
 
 import com.spinachtesters.spinachbooking.data.repositories.UserRepository
+import com.spinachtesters.spinachbooking.data.session.SessionManager
 import com.spinachtesters.spinachbooking.domain.models.User
 import com.spinachtesters.spinachbooking.domain.security.PasswordEncoder
 import com.spinachtesters.spinachbooking.testutils.MainDispatcherRule
@@ -13,6 +14,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
 
@@ -25,6 +27,11 @@ class LoginViewModelTest {
 
     private val userRepository: UserRepository = mockk()
     private val passwordEncoder: PasswordEncoder = mockk()
+
+    @BeforeEach
+    fun resetSession() {
+        SessionManager.clearSession()
+    }
 
     @Test
     fun login_withBlankFields_setsError() = runTest {
@@ -40,7 +47,7 @@ class LoginViewModelTest {
 
     @Test
     fun login_withUnknownUser_setsInvalidCredentials() = runTest {
-        val viewModel = LoginViewModel(userRepository, passwordEncoder)
+        val viewModel = LoginViewModel(userRepository, passwordEncoder, SessionManager)
         coEvery { userRepository.findByLoginIdentifier("unknown") } returns null
 
         viewModel.onIdentifierChanged("unknown")
@@ -51,11 +58,12 @@ class LoginViewModelTest {
 
         assertEquals("Invalid credentials.", viewModel.uiState.value.errorMessage)
         assertFalse(viewModel.uiState.value.isAuthenticated)
+        assertEquals("", SessionManager.currentUserId)
     }
 
     @Test
     fun login_withValidCredentials_authenticates() = runTest {
-        val viewModel = LoginViewModel(userRepository, passwordEncoder)
+        val viewModel = LoginViewModel(userRepository, passwordEncoder, SessionManager)
         val user = User(
             id = "u1",
             username = "jane",
@@ -84,6 +92,7 @@ class LoginViewModelTest {
         assertTrue(viewModel.uiState.value.isAuthenticated)
         assertEquals(null, viewModel.uiState.value.errorMessage)
         assertEquals("", viewModel.uiState.value.password)
+        assertEquals("u1", SessionManager.currentUserId)
     }
 }
 
