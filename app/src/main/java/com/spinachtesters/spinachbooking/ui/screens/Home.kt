@@ -1,6 +1,5 @@
 package com.spinachtesters.spinachbooking.ui.screens
 
-import android.widget.Space
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -34,6 +33,8 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 
 import androidx.compose.runtime.LaunchedEffect
@@ -191,13 +192,13 @@ fun HomeScreen(
     }
 
     @Composable
-    fun SearchDialog (
+    fun SearchDialog(
         onDismiss: () -> Unit
     ) {
         Dialog(onDismissRequest = {
             onDismiss()
         }) {
-            Card (
+            Card(
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = Background
@@ -226,7 +227,8 @@ fun HomeScreen(
                             fontFamily = PoppinsFontFamily,
                             fontSize = 13.sp,
                             modifier = Modifier.fillMaxWidth(0.90f),
-                            textAlign = TextAlign.Center)
+                            textAlign = TextAlign.Center
+                        )
                         Spacer(modifier = Modifier.height(6.dp))
                     }
                     Row {
@@ -250,8 +252,8 @@ fun HomeScreen(
 
                         Button(
                             onClick = {
-                            filterEventViewModel.reset()
-                            onDismiss()
+                                filterEventViewModel.reset()
+                                onDismiss()
                             },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = ButtonCancelRed
@@ -371,91 +373,97 @@ fun HomeScreen(
     }
 
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .background(Background)
-    ) {
+    Scaffold() { innerPadding ->
+        Column(
+            modifier = Modifier
+                .padding(
+                    top = innerPadding.calculateTopPadding(),
+                    bottom = innerPadding.calculateBottomPadding()
+                )
+                .verticalScroll(rememberScrollState())
+        ) {
+            HeaderSection()
+            Column(
+                modifier = Modifier.padding(
+                    start = 10.dp,
+                    end = 10.dp
+                )
+            ) {
+                Spacer(modifier = Modifier.height(16.dp))
 
-        HeaderSection()
+                SearchBar()
 
-        Column(modifier = Modifier.padding(10.dp)) {
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            SearchBar()
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            if (uiState.isFilterActive) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    OutlinedButton(
-                        onClick = {
-                            viewModel.clearFilteredEvents()
-                        },
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = ButtonCancelRed
-                        ),
-                        border = BorderStroke(1.dp, ButtonCancelRed),
-                        shape = RoundedCornerShape(20.dp)
+                if (uiState.isFilterActive) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.End
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
+                        OutlinedButton(
+                            onClick = {
+                                viewModel.clearFilteredEvents()
+                            },
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = ButtonCancelRed
+                            ),
+                            border = BorderStroke(1.dp, ButtonCancelRed),
+                            shape = RoundedCornerShape(20.dp)
                         ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Text(
+                                    text = "Clear",
+                                    fontSize = 14.sp
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+
+                AvailableEventsSection(if (uiState.isFilterActive) uiState.filteredEvents else availableEvents)
+
+                if (uiState.isFilterActive && uiState.filteredEvents.isEmpty()) {
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(50))
+                            .padding(horizontal = 16.dp, vertical = 14.dp)
+                            .border(
+                                width = 1.dp,
+                                color = ButtonCancelRed,
+                                shape = RoundedCornerShape(25)
+                            )
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = "Clear",
-                                fontSize = 14.sp
+                                text = "No events with the desired attributes were found....\n\nPlease try different attributes.",
+                                color = ButtonCancelRed,
+                                fontFamily = PoppinsFontFamily,
+                                fontSize = 16.sp,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(8.dp)
                             )
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(16.dp))
-            }
 
-
-            AvailableEventsSection(if(uiState.isFilterActive) uiState.filteredEvents else availableEvents)
-
-            if (uiState.isFilterActive && uiState.filteredEvents.isEmpty()) {
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(50))
-                        .padding(horizontal = 16.dp, vertical = 14.dp)
-                        .border(
-                            width = 1.dp,
-                            color = ButtonCancelRed,
-                            shape = RoundedCornerShape(25)
-                        )
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "No events with the desired attributes were found....\n\nPlease try different attributes.",
-                            color = ButtonCancelRed,
-                            fontFamily = PoppinsFontFamily,
-                            fontSize = 16.sp,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(8.dp)
-                        )
-                    }
-                }
+                BookedEventsSection(bookedEvents)
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            BookedEventsSection(bookedEvents)
         }
+
     }
-
 }
-
 fun formatDate(dateTime: LocalDate): String {
     val dateFormatter = DateTimeFormatter.ofPattern("MMM dd")
     return dateTime.format(dateFormatter)
