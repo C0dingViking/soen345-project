@@ -16,16 +16,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,6 +37,7 @@ import com.spinachtesters.spinachbooking.domain.models.FilmDetails
 import com.spinachtesters.spinachbooking.domain.models.SportDetails
 import com.spinachtesters.spinachbooking.domain.models.TheaterDetails
 import com.spinachtesters.spinachbooking.ui.components.MinimalTopBar
+import com.spinachtesters.spinachbooking.ui.navigation.Screen
 import com.spinachtesters.spinachbooking.ui.theme.Background
 import com.spinachtesters.spinachbooking.ui.theme.ButtonYellow
 import com.spinachtesters.spinachbooking.ui.theme.PoppinsFontFamily
@@ -63,8 +60,11 @@ fun EventDetailScreen(
         viewModel.loadEvent(eventId)
     }
 
-    var alertsEnabled by remember(uiState.event?.id, uiState.isBooked) {
-        mutableStateOf(uiState.isBooked) // FIXME: no way to store the alerts atm
+    LaunchedEffect(uiState.shouldNavigateHome) {
+        if (uiState.shouldNavigateHome) {
+            navController.popBackStack()
+            viewModel.resetNavigation()
+        }
     }
 
     Scaffold(
@@ -103,7 +103,6 @@ fun EventDetailScreen(
             uiState.event != null -> {
                 val event = uiState.event!!
 
-                // conditional alert dialogs
                 when (val dialogState = uiState.dialogState) {
                     is EventDetailDialogState.Error -> {
                         AlertDialog(

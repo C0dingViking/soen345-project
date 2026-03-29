@@ -18,7 +18,8 @@ data class EventDetailUiState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val isBooked: Boolean = false,
-    val dialogState: EventDetailDialogState = EventDetailDialogState.None
+    val dialogState: EventDetailDialogState = EventDetailDialogState.None,
+    val shouldNavigateHome: Boolean = false
 )
 
 sealed class EventDetailDialogState {
@@ -162,7 +163,8 @@ class EventDetailViewModel(
                 _uiState.update {
                     it.copy(
                         isBooked = true,
-                        dialogState = EventDetailDialogState.None
+                        dialogState = EventDetailDialogState.None,
+                        shouldNavigateHome = true
                     )
                 }
             } catch (_: Exception) {
@@ -198,7 +200,8 @@ class EventDetailViewModel(
                     _uiState.update {
                         it.copy(
                             isBooked = false,
-                            dialogState = EventDetailDialogState.None
+                            dialogState = EventDetailDialogState.None,
+                            shouldNavigateHome = true
                         )
                     }
                 } else {
@@ -220,6 +223,10 @@ class EventDetailViewModel(
 
     fun dismissDialog() {
         _uiState.update { it.copy(dialogState = EventDetailDialogState.None) }
+    }
+
+    fun resetNavigation() {
+        _uiState.update { it.copy(shouldNavigateHome = false) }
     }
 
     private suspend fun checkIfUserHasBooked(userId: String, eventId: String): Boolean {
