@@ -24,12 +24,13 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
@@ -60,6 +61,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.spinachtesters.spinachbooking.ui.navigation.Screen
 import com.spinachtesters.spinachbooking.ui.viewmodels.HomeViewModel
+import com.spinachtesters.spinachbooking.ui.viewmodels.SignUpViewModel
 
 
 val sampleEvents = listOf(
@@ -270,28 +272,36 @@ fun HomeScreen(
     }
 
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .background(Background)
-    ) {
+    Scaffold() { innerPadding ->
+        Column(
+            modifier = Modifier
+                .padding(
+                    top = innerPadding.calculateTopPadding(),
+                    bottom = innerPadding.calculateBottomPadding()
+                )
+                .verticalScroll(rememberScrollState())
+        ) {
+            HeaderSection()
+            Column(
+                modifier = Modifier.padding(
+                    start = 10.dp,
+                    end = 10.dp
+                )
+            ) {
+                Spacer(modifier = Modifier.height(16.dp))
 
-        HeaderSection()
+                SearchBar()
 
-        Column(modifier = Modifier.padding(10.dp)) {
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            SearchBar()
+                AvailableEventsSection(availableEvents)
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            AvailableEventsSection(availableEvents)
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            BookedEventsSection(bookedEvents)
+                BookedEventsSection(bookedEvents)
+            }
         }
+
     }
 
 }
