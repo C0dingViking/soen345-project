@@ -67,7 +67,7 @@ class HomeViewModel(
 
         return bookingRepository.getAll()
             .asSequence()
-            .filter { it.bookedBy == currentUserId }
+            .filter { it.bookedBy == currentUserId && it.status == "ACTIVE" }
             .mapNotNull { booking -> eventById[booking.bookedFor] }
             .filter { event -> !event.startTime.isBefore(now) }
             .distinctBy { it.id }

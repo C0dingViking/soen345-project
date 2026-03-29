@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.UUID
 
 data class EventDetailUiState(
     val event: Event? = null,
@@ -152,7 +151,7 @@ class EventDetailViewModel(
 
         viewModelScope.launch {
             try {
-                val bookingId = UUID.randomUUID().toString()
+                val bookingId = generateBookingId(currentUserId, event.id)
                 val booking = Booking(
                     bookedBy = currentUserId,
                     bookedFor = event.id,
