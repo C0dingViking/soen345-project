@@ -56,6 +56,7 @@ import java.time.format.DateTimeFormatter
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.spinachtesters.spinachbooking.ui.navigation.Screen
 import com.spinachtesters.spinachbooking.ui.viewmodels.SignUpViewModel
 
 
@@ -203,7 +204,11 @@ fun HomeScreen(
                 items(events) { event ->
                     EventCard(
                         event = event,
-                        onClick = {}
+                        onClick = {
+                            navController.navigate(
+                                Screen.EventDetail.createRoute(event.id)
+                            )
+                        }
                     )
                 }
             }
