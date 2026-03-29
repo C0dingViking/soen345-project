@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 
@@ -252,28 +253,36 @@ fun HomeScreen(
     }
 
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .background(Background)
-    ) {
+    Scaffold() { innerPadding ->
+        Column(
+            modifier = Modifier
+                .padding(
+                    top = innerPadding.calculateTopPadding(),
+                    bottom = innerPadding.calculateBottomPadding()
+                )
+                .verticalScroll(rememberScrollState())
+        ) {
+            HeaderSection()
+            Column(
+                modifier = Modifier.padding(
+                    start = 10.dp,
+                    end = 10.dp
+                )
+            ) {
+                Spacer(modifier = Modifier.height(16.dp))
 
-        HeaderSection()
+                SearchBar()
 
-        Column(modifier = Modifier.padding(10.dp)) {
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            SearchBar()
+                AvailableEventsSection(sampleEvents)
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            AvailableEventsSection(sampleEvents)
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            BookedEventsSection(sampleBookings)
+                BookedEventsSection(sampleBookings)
+            }
         }
+
     }
 
 }
