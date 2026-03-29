@@ -1,23 +1,26 @@
 package com.spinachtesters.spinachbooking.ui.components.cards
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxColors
 import androidx.compose.material3.CheckboxDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.spinachtesters.spinachbooking.ui.theme.BackgroundGrey
 import com.spinachtesters.spinachbooking.ui.theme.SecondaryGreen
@@ -31,7 +34,8 @@ fun BookedCardPreview() {
         date = "Jan 23",
         time = "17:00",
         checked = true,
-        onCheckedChange = {}
+        onCheckedChange = {},
+        onClick = {}
     )
 }
 
@@ -42,13 +46,15 @@ fun BookedCard(
     date: String,
     time: String,
     checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
+    onClick: () -> Unit = {}
 ) {
     Card(
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 6.dp),
+            .padding(vertical = 6.dp)
+            .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(containerColor = BackgroundGrey)
     ) {
         Row(
@@ -85,14 +91,6 @@ fun BookedCard(
                     )
                     Text(text = time, textAlign = TextAlign.Center)
                 }
-
-                Checkbox(
-                    checked = checked,
-                    onCheckedChange = onCheckedChange,
-                    colors = CheckboxDefaults.colors(
-                        checkedColor = SecondaryGreen
-                    )
-                )
             }
         }
     }

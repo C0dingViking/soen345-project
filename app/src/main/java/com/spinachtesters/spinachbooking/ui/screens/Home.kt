@@ -242,11 +242,6 @@ fun HomeScreen(
                     "Booked events:",
                     style = MaterialTheme.typography.titleMedium
                 )
-
-                Text(
-                    "Alerts",
-                    style = MaterialTheme.typography.bodyMedium
-                )
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -262,7 +257,12 @@ fun HomeScreen(
                         date = formatDate(event.date),
                         time = formatTime(event.startTime),
                         checked = index == 0,
-                        onCheckedChange = {}
+                        onCheckedChange = {},
+                        onClick = {
+                            if (event.id.isNotBlank()) {
+                                navController.navigate(Screen.EventDetail.createRoute(event.id))
+                            }
+                        }
                     )
                 }
             }

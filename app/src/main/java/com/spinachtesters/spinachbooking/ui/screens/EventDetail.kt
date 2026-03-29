@@ -207,25 +207,6 @@ fun EventDetailScreen(
                         value = event.startTime.format(DateTimeFormatter.ofPattern("HH:mm"))
                     )
 
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    if (uiState.isBooked) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
-                        ) {
-                            Text(text = "Alerts")
-                            Checkbox(
-                                checked = alertsEnabled,
-                                onCheckedChange = { checked ->
-                                    alertsEnabled = checked
-                                },
-                                enabled = true // FIXME: no way to actually store this alerts for now
-                            )
-                        }
-                    }
-
                     Spacer(modifier = Modifier.height(24.dp))
 
                     Text(
