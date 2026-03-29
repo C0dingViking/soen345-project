@@ -1,6 +1,8 @@
 package com.spinachtesters.spinachbooking.ui.viewmodels
 
+import com.spinachtesters.spinachbooking.data.repositories.BookingRepository
 import com.spinachtesters.spinachbooking.data.repositories.EventRepository
+import com.spinachtesters.spinachbooking.data.session.SessionManager
 import com.spinachtesters.spinachbooking.domain.models.Event
 import com.spinachtesters.spinachbooking.domain.models.SportDetails
 import com.spinachtesters.spinachbooking.testutils.MainDispatcherRule
@@ -13,6 +15,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.LocalDate
@@ -26,6 +29,13 @@ class EventDetailViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private val eventRepository: EventRepository = mockk()
+    private val bookingRepository: BookingRepository = mockk()
+
+    @BeforeEach
+    fun setup() {
+        SessionManager.clearSession()
+        coEvery { bookingRepository.getAll() } returns emptyList()
+    }
 
     @Test
     fun loadEvent_withValidId_loadsEvent() = runTest {
@@ -42,7 +52,11 @@ class EventDetailViewModelTest {
         )
         coEvery { eventRepository.getById("e1") } returns expected
 
-        val viewModel = EventDetailViewModel(eventRepository)
+        val viewModel = EventDetailViewModel(
+            eventRepository = eventRepository,
+            bookingRepository = bookingRepository,
+            sessionManager = SessionManager
+        )
         viewModel.loadEvent("e1")
         advanceUntilIdle()
 
@@ -54,7 +68,11 @@ class EventDetailViewModelTest {
 
     @Test
     fun loadEvent_withMissingId_setsNotFound() = runTest {
-        val viewModel = EventDetailViewModel(eventRepository)
+        val viewModel = EventDetailViewModel(
+            eventRepository = eventRepository,
+            bookingRepository = bookingRepository,
+            sessionManager = SessionManager
+        )
         viewModel.loadEvent(null)
 
         assertNull(viewModel.uiState.value.event)
@@ -66,7 +84,11 @@ class EventDetailViewModelTest {
     fun loadEvent_whenRepositoryFails_setsError() = runTest {
         coEvery { eventRepository.getById("e1") } throws RuntimeException("db down")
 
-        val viewModel = EventDetailViewModel(eventRepository)
+        val viewModel = EventDetailViewModel(
+            eventRepository = eventRepository,
+            bookingRepository = bookingRepository,
+            sessionManager = SessionManager
+        )
         viewModel.loadEvent("e1")
         advanceUntilIdle()
 
@@ -75,4 +97,3 @@ class EventDetailViewModelTest {
         assertEquals("Could not load event.", viewModel.uiState.value.errorMessage)
     }
 }
-
