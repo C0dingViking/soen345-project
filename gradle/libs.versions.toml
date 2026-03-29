@@ -13,6 +13,7 @@ material3 = "1.4.0"
 navigation = "2.8.0"
 navigationTesting = "2.8.0"
 runner = "1.6.1"
+foundation = "1.10.6"
 
 [libraries]
 androidx-espresso-core-v361 = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCoreVersion" }
@@ -41,6 +42,7 @@ androidx-compose-material = {group = "androidx.compose.material", name = "materi
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
 androidx-navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "navigationTesting" }
+androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

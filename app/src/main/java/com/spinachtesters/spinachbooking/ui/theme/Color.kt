@@ -10,6 +10,8 @@ val BackgroundGrey = Color(0xFFd9d9d9)
 val PrimaryGreen = Color(0xFF417739)
 val SecondaryGreen = Color(0xFF8FAE8A)
 val ButtonYellow = Color(0xFFFFC857)
+
+val ButtonCancelRed = Color(0xFFD9534F)
 val TextGreen = Color(0xFF1F2A1F)
 
 val Purple80 = Color(0xFFD0BCFF)

@@ -2,16 +2,19 @@ package com.spinachtesters.spinachbooking.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -20,6 +23,11 @@ import androidx.compose.foundation.verticalScroll
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -28,6 +36,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
@@ -35,28 +45,32 @@ import androidx.compose.runtime.setValue
 
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+
 import com.spinachtesters.spinachbooking.R
 import com.spinachtesters.spinachbooking.domain.models.ConcertDetails
 import com.spinachtesters.spinachbooking.domain.models.Event
 import com.spinachtesters.spinachbooking.domain.models.SportDetails
 import com.spinachtesters.spinachbooking.ui.components.cards.BookedCard
 import com.spinachtesters.spinachbooking.ui.components.cards.EventCard
-import com.spinachtesters.spinachbooking.ui.theme.Background
-import com.spinachtesters.spinachbooking.ui.theme.BackgroundGrey
-import com.spinachtesters.spinachbooking.ui.theme.SecondaryGreen
-import com.spinachtesters.spinachbooking.ui.theme.TextGreen
+import com.spinachtesters.spinachbooking.ui.theme.*
+import com.spinachtesters.spinachbooking.ui.viewmodels.HomeViewModel
+import com.spinachtesters.spinachbooking.ui.components.FilterEventForm
+
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.spinachtesters.spinachbooking.ui.viewmodels.SignUpViewModel
+
 
 
 val sampleEvents = listOf(
@@ -129,8 +143,16 @@ fun HomeScreen() {
 @Composable
 fun HomeScreen(
     navController: NavController,
-    viewModel: SignUpViewModel = viewModel()
+    viewModel: HomeViewModel = viewModel()
 ) {
+
+    val uiState by viewModel.uiState.collectAsState()
+
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    LaunchedEffect(navBackStackEntry) {
+        viewModel.loadEvents()
+    }
+
     @Composable
     fun HeaderSection() {
         Box(
@@ -158,31 +180,106 @@ fun HomeScreen(
     }
 
     @Composable
+    fun SearchDialog (
+        onDismiss: () -> Unit
+    ) {
+        Dialog(onDismissRequest = {
+            onDismiss()
+        }) {
+            Card (
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Background
+                ),
+                modifier = Modifier
+                    .fillMaxWidth(1f)
+                    .fillMaxHeight(0.85f)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(16.dp)
+                ) {
+
+                    Text("Search Events")
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Box(modifier = Modifier.weight(1f)) {
+                        FilterEventForm()
+                    }
+
+                    Row {
+                        Button(
+                            onClick = {
+                                // val filter = viewModel.buildFilter()
+                                // onApply(filter)
+                                // viewModel.reset()
+                                onDismiss()
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = ButtonYellow
+                            ),
+                        ) {
+                            Text("Search")
+                        }
+
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        Button(
+                            onClick = {
+                            //viewModel.reset()
+                            onDismiss()
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = ButtonCancelRed
+                            ),
+                        ) {
+                            Text("Cancel")
+                        }
+
+
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
     fun SearchBar() {
+        var showDialog by remember { mutableStateOf(false) }
 
-        var text by remember { mutableStateOf("") }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .clip(RoundedCornerShape(50))
+                .background(SecondaryGreen)
+                .clickable { showDialog = true }
+                .padding(horizontal = 16.dp, vertical = 14.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "Search for an event...",
+                    color = TextGreen,
+                    modifier = Modifier.weight(1f)
+                )
 
-        TextField(
-            value = text,
-            onValueChange = { text = it },
-            placeholder = { Text("Search for an event...", color = TextGreen) },
-            shape = RoundedCornerShape(50),
-            trailingIcon = {
                 Icon(
                     Icons.Default.Search,
                     contentDescription = null,
                     tint = Color.Black,
                     modifier = Modifier.size(32.dp)
                 )
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = BackgroundGrey,
-                unfocusedContainerColor = SecondaryGreen
+            }
+        }
+
+        if (showDialog) {
+            SearchDialog(
+                onDismiss = {
+                    showDialog = false
+                }
             )
-        )
+        }
     }
 
     @Composable
