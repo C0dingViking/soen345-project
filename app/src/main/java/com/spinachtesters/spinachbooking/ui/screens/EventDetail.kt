@@ -44,6 +44,8 @@ import com.spinachtesters.spinachbooking.ui.components.MinimalTopBar
 import com.spinachtesters.spinachbooking.ui.theme.Background
 import com.spinachtesters.spinachbooking.ui.theme.ButtonYellow
 import com.spinachtesters.spinachbooking.ui.theme.PoppinsFontFamily
+import com.spinachtesters.spinachbooking.ui.theme.PrimaryGreen
+import com.spinachtesters.spinachbooking.ui.theme.TextGray
 import com.spinachtesters.spinachbooking.ui.theme.TextGreen
 import com.spinachtesters.spinachbooking.ui.viewmodels.EventDetailDialogState
 import com.spinachtesters.spinachbooking.ui.viewmodels.EventDetailViewModel
@@ -82,7 +84,7 @@ fun EventDetailScreen(
                         .padding(innerPadding),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "Loading event...", color = TextGreen)
+                    Text(text = "Loading event...")
                 }
             }
 
@@ -94,13 +96,14 @@ fun EventDetailScreen(
                         .padding(innerPadding),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = uiState.errorMessage!!, color = TextGreen)
+                    Text(text = uiState.errorMessage!!)
                 }
             }
 
             uiState.event != null -> {
                 val event = uiState.event!!
 
+                // conditional alert dialogs
                 when (val dialogState = uiState.dialogState) {
                     is EventDetailDialogState.Error -> {
                         AlertDialog(
@@ -189,7 +192,6 @@ fun EventDetailScreen(
                         text = event.title,
                         fontSize = 30.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = TextGreen
                     )
 
                     Spacer(modifier = Modifier.height(20.dp))
@@ -207,21 +209,21 @@ fun EventDetailScreen(
 
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Text(text = "Alerts", color = TextGreen)
-                        Checkbox(
-                            checked = alertsEnabled,
-                            onCheckedChange = { checked ->
-                                if (uiState.isBooked) {
+                    if (uiState.isBooked) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                        ) {
+                            Text(text = "Alerts")
+                            Checkbox(
+                                checked = alertsEnabled,
+                                onCheckedChange = { checked ->
                                     alertsEnabled = checked
-                                }
-                            },
-                            enabled = uiState.isBooked
-                        )
+                                },
+                                enabled = true // FIXME: no way to actually store this alerts for now
+                            )
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(24.dp))
@@ -229,17 +231,17 @@ fun EventDetailScreen(
                     Text(
                         text = "Description",
                         fontWeight = FontWeight.Medium,
-                        color = TextGreen
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = buildDescription(event),
-                        color = TextGreen
+                        color = PrimaryGreen
                     )
 
                     Spacer(modifier = Modifier.height(36.dp))
 
                     Button(
+                        modifier = Modifier.padding(25.dp),
                         onClick = {
                             if (uiState.isBooked) {
                                 viewModel.requestCancelConfirmation()
@@ -255,8 +257,6 @@ fun EventDetailScreen(
                             fontSize = 24.sp
                         )
                     }
-
-                    Spacer(modifier = Modifier.height(20.dp))
                 }
             }
 
@@ -283,8 +283,8 @@ private fun EventMetaRow(label: String, value: String) {
             .padding(vertical = 4.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(text = label, color = TextGreen, fontSize = 28.sp)
-        Text(text = value, color = TextGreen, fontSize = 28.sp)
+        Text(text = label, fontSize = 28.sp, color = TextGray)
+        Text(text = value, fontSize = 28.sp)
     }
 }
 

@@ -11,6 +11,7 @@ val PrimaryGreen = Color(0xFF417739)
 val SecondaryGreen = Color(0xFF8FAE8A)
 val ButtonYellow = Color(0xFFFFC857)
 val TextGreen = Color(0xFF1F2A1F)
+val TextGray = Color(0xFF6B7280)
 
 val Purple80 = Color(0xFFD0BCFF)
 val PurpleGrey80 = Color(0xFFCCC2DC)
