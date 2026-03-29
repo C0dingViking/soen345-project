@@ -18,7 +18,6 @@ import androidx.compose.material.TextField
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,16 +52,16 @@ fun FilterEventForm(
 
         item {
             MakeGenericTextfield(
-                uiState.name,
-                viewModel::onNameChanged,
+                uiState.title,
+                viewModel::onTitleChanged,
                 "Event Name",
-                "search"
+                "eventTitle"
             )
         }
 
         item {
             MakeGenericTextfield(
-                uiState.maxPrice,
+                uiState.minPrice,
                 viewModel::onMinPriceChanged,
                 "Min Price ($)",
                 "minPrice",
@@ -195,6 +194,15 @@ fun FilterEventForm(
                             "genre"
                         )
                     }
+                    item {
+                        MakeGenericTextfield(
+                            uiState.theaterDuration,
+                            viewModel::onTheaterDurationChanged,
+                            "Play Duration (minutes)",
+                            "duration",
+                            true
+                        )
+                    }
                 }
                 "Sports" -> {
                     item {
@@ -241,6 +249,15 @@ fun FilterEventForm(
                     }
                     item {
                         MakeGenericTextfield(
+                            uiState.filmRuntime,
+                            viewModel::onFilmRuntimeChanged,
+                            "Film Runtime (minutes)",
+                            "runtime",
+                            true
+                        )
+                    }
+                    item {
+                        MakeGenericTextfield(
                             uiState.filmRating,
                             viewModel::onFilmRatingChanged,
                             "Film Rating (?/5)",
@@ -276,12 +293,6 @@ fun FilterEventForm(
                     }
                 }
             }
-        }
-    }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            viewModel.reset()
         }
     }
 }
