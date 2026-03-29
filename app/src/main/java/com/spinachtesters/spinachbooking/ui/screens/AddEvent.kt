@@ -51,6 +51,7 @@ import androidx.navigation.compose.rememberNavController
 import com.spinachtesters.spinachbooking.ui.components.DateSelector
 import com.spinachtesters.spinachbooking.ui.components.MinimalTopBar
 import com.spinachtesters.spinachbooking.ui.components.TimeSelector
+import com.spinachtesters.spinachbooking.ui.theme.Background
 import com.spinachtesters.spinachbooking.ui.theme.PoppinsFontFamily
 import com.spinachtesters.spinachbooking.ui.theme.PrimaryGreen
 import com.spinachtesters.spinachbooking.ui.theme.SecondaryGreen
@@ -85,6 +86,7 @@ fun AddEventScreen(
         content = { innerPadding ->
             Column(
                 modifier = Modifier
+                    .background(Background)
                     .fillMaxSize()
                     .padding(innerPadding)
                     .padding(16.dp),

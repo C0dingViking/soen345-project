@@ -44,6 +44,7 @@ import androidx.navigation.compose.rememberNavController
 import com.spinachtesters.spinachbooking.domain.models.Event
 import com.spinachtesters.spinachbooking.ui.components.MinimalTopBar
 import com.spinachtesters.spinachbooking.ui.components.cards.EditableEventCard
+import com.spinachtesters.spinachbooking.ui.theme.Background
 import com.spinachtesters.spinachbooking.ui.theme.PoppinsFontFamily
 import com.spinachtesters.spinachbooking.ui.viewmodels.ManageEventsViewModel
 
@@ -72,6 +73,7 @@ fun ManageEventsScreen(
         content = { innerPadding ->
             Column(
                 modifier = Modifier
+                    .background(Background)
                     .fillMaxSize()
                     .padding(innerPadding)
                     .padding(16.dp),
@@ -115,8 +117,7 @@ fun ManageEventsScreen(
                                 .padding(horizontal = 24.dp)
                                 .fillMaxWidth(0.90f)
                         )
-                    }
-                    else {
+                    } else {
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
                             verticalArrangement = Arrangement.spacedBy(12.dp)

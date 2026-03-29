@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.spinachtesters.spinachbooking.data.repositories.UserRepository
 import com.spinachtesters.spinachbooking.data.security.Pbkdf2PasswordEncoder
+import com.spinachtesters.spinachbooking.data.session.SessionManager
 import com.spinachtesters.spinachbooking.domain.security.PasswordEncoder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,7 +23,8 @@ data class LoginUiState(
 
 class LoginViewModel(
     private val userRepository: UserRepository = UserRepository(),
-    private val passwordEncoder: PasswordEncoder = Pbkdf2PasswordEncoder()
+    private val passwordEncoder: PasswordEncoder = Pbkdf2PasswordEncoder(),
+    private val sessionManager: SessionManager = SessionManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginUiState())
@@ -44,11 +46,23 @@ class LoginViewModel(
         }
 
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null, isAuthenticated = false) }
+            _uiState.update {
+                it.copy(
+                    isLoading = true,
+                    errorMessage = null,
+                    isAuthenticated = false
+                )
+            }
+            sessionManager.clearSession()
             try {
                 val user = userRepository.findByLoginIdentifier(state.identifier)
                 if (user == null) {
-                    _uiState.update { it.copy(isLoading = false, errorMessage = "Invalid credentials.") }
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = "Invalid credentials."
+                        )
+                    }
                     return@launch
                 }
 
@@ -60,10 +74,16 @@ class LoginViewModel(
                 )
 
                 if (!isPasswordValid) {
-                    _uiState.update { it.copy(isLoading = false, errorMessage = "Invalid credentials.") }
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = "Invalid credentials."
+                        )
+                    }
                     return@launch
                 }
 
+                sessionManager.startSession(userId = user.id, isOrganizer = user.organizer)
                 _uiState.update {
                     it.copy(
                         password = "",
@@ -74,7 +94,13 @@ class LoginViewModel(
                     )
                 }
             } catch (_: Exception) {
-                _uiState.update { it.copy(isLoading = false, errorMessage = "Could not complete login.") }
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = "Could not complete login."
+                    )
+                }
+                sessionManager.clearSession()
             }
         }
     }

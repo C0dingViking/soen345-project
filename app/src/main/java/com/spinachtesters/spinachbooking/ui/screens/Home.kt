@@ -29,6 +29,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
@@ -57,6 +59,8 @@ import java.time.format.DateTimeFormatter
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.spinachtesters.spinachbooking.ui.navigation.Screen
+import com.spinachtesters.spinachbooking.ui.viewmodels.HomeViewModel
 import com.spinachtesters.spinachbooking.ui.viewmodels.SignUpViewModel
 
 
@@ -124,14 +128,29 @@ val sampleBookings = listOf(
 @Composable
 @Preview
 fun HomeScreen() {
-    HomeScreen(navController = rememberNavController())
+    HomeScreen(
+        loadOnStart = false,
+        navController = rememberNavController()
+    )
 }
 
 @Composable
 fun HomeScreen(
-    navController: NavController,
-    viewModel: SignUpViewModel = viewModel()
+    viewModel: HomeViewModel = viewModel(),
+    loadOnStart: Boolean = true,
+    navController: NavController
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(loadOnStart) {
+        if (loadOnStart) {
+            viewModel.loadHomeData()
+        }
+    }
+
+    val availableEvents = if (loadOnStart) uiState.events else sampleEvents
+    val bookedEvents = if (loadOnStart) uiState.upcomingBookings else sampleBookings
+
     @Composable
     fun HeaderSection() {
         Box(
@@ -204,7 +223,7 @@ fun HomeScreen(
                 items(events) { event ->
                     EventCard(
                         event = event,
-                        onClick = {}
+                        onClick = { navController.navigate(Screen.EventDetail.createRoute(event.id)) }
                     )
                 }
             }
@@ -225,11 +244,6 @@ fun HomeScreen(
                     "Booked events:",
                     style = MaterialTheme.typography.titleMedium
                 )
-
-                Text(
-                    "Alerts",
-                    style = MaterialTheme.typography.bodyMedium
-                )
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -245,7 +259,12 @@ fun HomeScreen(
                         date = formatDate(event.date),
                         time = formatTime(event.startTime),
                         checked = index == 0,
-                        onCheckedChange = {}
+                        onCheckedChange = {},
+                        onClick = {
+                            if (event.id.isNotBlank()) {
+                                navController.navigate(Screen.EventDetail.createRoute(event.id))
+                            }
+                        }
                     )
                 }
             }
@@ -275,11 +294,11 @@ fun HomeScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                AvailableEventsSection(sampleEvents)
+                AvailableEventsSection(availableEvents)
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                BookedEventsSection(sampleBookings)
+                BookedEventsSection(bookedEvents)
             }
         }
 

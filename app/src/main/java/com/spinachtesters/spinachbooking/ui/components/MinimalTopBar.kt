@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
+import com.spinachtesters.spinachbooking.ui.theme.Background
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(widthDp = 360, heightDp = 120)
@@ -36,7 +37,8 @@ fun MinimalTopBar(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .background(Background)
+                    .fillMaxWidth(),
             ) {
                 if (showBackButton) {
                     Surface(
