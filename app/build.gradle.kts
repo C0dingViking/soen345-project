@@ -1,11 +1,13 @@
 import org.jetbrains.kotlin.gradle.plugin.kotlinToolingVersion
 
 plugins {
-    id("com.google.gms.google-services")
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.gms.google-services")
     jacoco
 }
+
+apply(plugin = "androidx.navigation.safeargs.kotlin")
 
 val exclusions = listOf(
     "**/R.class",
@@ -73,7 +75,6 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.compose.foundation)
-    implementation(libs.androidx.navigation.safe.args.generator)
     testImplementation(libs.junit)
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.0")
     testRuntimeOnly(libs.junit.engine)
@@ -86,6 +87,7 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     implementation(platform("com.google.firebase:firebase-bom:34.10.0"))
+    implementation("com.google.firebase:firebase-database")
     testImplementation("io.mockk:mockk:1.14.9")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
     androidTestImplementation("io.mockk:mockk-android:1.14.9")
