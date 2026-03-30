@@ -40,6 +40,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
@@ -74,6 +76,9 @@ import java.time.format.DateTimeFormatter
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.spinachtesters.spinachbooking.ui.navigation.Screen
+import com.spinachtesters.spinachbooking.ui.viewmodels.HomeViewModel
+import com.spinachtesters.spinachbooking.ui.viewmodels.SignUpViewModel
 import com.spinachtesters.spinachbooking.ui.viewmodels.FilterEventViewModel
 
 
@@ -351,11 +356,6 @@ fun HomeScreen(
                     "Booked events:",
                     style = MaterialTheme.typography.titleMedium
                 )
-
-                Text(
-                    "Alerts",
-                    style = MaterialTheme.typography.bodyMedium
-                )
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -371,7 +371,12 @@ fun HomeScreen(
                         date = formatDate(event.date),
                         time = formatTime(event.startTime),
                         checked = index == 0,
-                        onCheckedChange = {}
+                        onCheckedChange = {},
+                        onClick = {
+                            if (event.id.isNotBlank()) {
+                                navController.navigate(Screen.EventDetail.createRoute(event.id))
+                            }
+                        }
                     )
                 }
             }

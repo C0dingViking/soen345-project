@@ -33,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -44,6 +45,8 @@ import androidx.navigation.compose.rememberNavController
 import com.spinachtesters.spinachbooking.domain.models.Event
 import com.spinachtesters.spinachbooking.ui.components.MinimalTopBar
 import com.spinachtesters.spinachbooking.ui.components.cards.EditableEventCard
+import com.spinachtesters.spinachbooking.ui.navigation.Screen
+import com.spinachtesters.spinachbooking.ui.theme.Background
 import com.spinachtesters.spinachbooking.ui.theme.PoppinsFontFamily
 import com.spinachtesters.spinachbooking.ui.viewmodels.ManageEventsViewModel
 
@@ -72,6 +75,7 @@ fun ManageEventsScreen(
         content = { innerPadding ->
             Column(
                 modifier = Modifier
+                    .background(Background)
                     .fillMaxSize()
                     .padding(innerPadding)
                     .padding(16.dp),
@@ -115,15 +119,19 @@ fun ManageEventsScreen(
                                 .padding(horizontal = 24.dp)
                                 .fillMaxWidth(0.90f)
                         )
-                    }
-                    else {
+                    } else {
                         LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .testTag("manage_events_list"),
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             items(uiState.events!!) { event ->
                                 EditableEventCard(
                                     subject = event,
+                                    clickCardCallback = {
+                                        navController.navigate(Screen.ModifyEvent.createRoute(event.id))
+                                    },
                                     clickDeleteCallback = { eventToDelete = event }
                                 )
                             }

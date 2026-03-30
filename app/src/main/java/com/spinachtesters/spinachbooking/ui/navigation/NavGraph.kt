@@ -13,6 +13,7 @@ import com.spinachtesters.spinachbooking.ui.screens.EventDetailScreen
 import com.spinachtesters.spinachbooking.ui.screens.HomeScreen
 import com.spinachtesters.spinachbooking.ui.screens.LoginScreen
 import com.spinachtesters.spinachbooking.ui.screens.ManageEventsScreen
+import com.spinachtesters.spinachbooking.ui.screens.ModifyEventScreen
 import com.spinachtesters.spinachbooking.ui.screens.SignUpScreen
 
 sealed class Screen(val route: String) {
@@ -21,6 +22,9 @@ sealed class Screen(val route: String) {
     object Home : Screen("home")
     object ManageEvents : Screen("manage_events")
     object AddEvent : Screen("add_event")
+    object ModifyEvent : Screen("modify_event/{eventId}") {
+        fun createRoute(eventId: String) = "modify_event/$eventId"
+    }
 
     object EventDetail : Screen("event_detail/{eventId}") {
         fun createRoute(eventId: String) = "event_detail/$eventId"
@@ -47,6 +51,13 @@ fun NavGraph(navController: NavHostController) {
         }
         composable(Screen.AddEvent.route) {
             AddEventScreen(navController)
+        }
+        composable(
+            route = Screen.ModifyEvent.route,
+            arguments = listOf(navArgument("eventId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val eventId = backStackEntry.arguments?.getString("eventId")
+            ModifyEventScreen(eventId = eventId, navController = navController)
         }
         composable(
             route = Screen.EventDetail.route,

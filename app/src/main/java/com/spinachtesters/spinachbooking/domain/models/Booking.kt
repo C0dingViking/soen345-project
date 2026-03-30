@@ -6,11 +6,11 @@ import com.spinachtesters.spinachbooking.data.models.BookingDTO
 import java.time.LocalDate
 
 @RequiresApi(Build.VERSION_CODES.O)
-data class Booking (
+data class Booking(
     val bookedBy: String = "",   // FKEY to a User instance
     val bookedFor: String = "",   // FKEY to an Event instance
     val dateOfBooking: LocalDate = LocalDate.now(),
-    val status: String = ""
+    val status: String = "" // "ACTIVE", "CANCELLED"
 )
 
 @RequiresApi(Build.VERSION_CODES.O)

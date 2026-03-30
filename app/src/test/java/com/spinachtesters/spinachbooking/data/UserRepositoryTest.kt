@@ -134,4 +134,34 @@ class UserRepositoryTest {
 
         assertNull(result)
     }
+
+    @Test
+    @DisplayName("deleteById delegates the action to FirebaseRepository")
+    fun deleteByIdDelegatesToSource() = runTest {
+        coEvery { fakeSource.deleteById("test123") } just Runs
+
+        repo.deleteById("test123")
+
+        coVerify(exactly = 1) { fakeSource.deleteById("test123") }
+    }
+
+    @Test
+    @DisplayName("findByUsername returns user when username matches ignoring case and spaces")
+    fun findByUsernameReturnsUser() = runTest {
+        coEvery { fakeSource.getAll() } returns listOf(testUser)
+
+        val result = repo.findByUsername("  USERNAME123  ")
+
+        assertEquals(testUser, result)
+    }
+
+    @Test
+    @DisplayName("findByUsername returns null when no username matches")
+    fun findByUsernameReturnsNull() = runTest {
+        coEvery { fakeSource.getAll() } returns listOf(testUser)
+
+        val result = repo.findByUsername("unknown")
+
+        assertNull(result)
+    }
 }

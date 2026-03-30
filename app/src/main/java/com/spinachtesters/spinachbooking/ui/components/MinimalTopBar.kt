@@ -5,23 +5,21 @@ import com.spinachtesters.spinachbooking.R
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
+import com.spinachtesters.spinachbooking.ui.theme.Background
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(widthDp = 360, heightDp = 120)
@@ -36,11 +34,14 @@ fun MinimalTopBar(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .background(Background)
+                    .fillMaxWidth(),
             ) {
                 if (showBackButton) {
                     Surface(
-                        modifier = Modifier.size(40.dp),
+                        modifier = Modifier
+                            .size(40.dp)
+                            .testTag("topbar_back_button"),
                         shape = CircleShape,
                         color = Color(0xFF1F2A1F),
                         onClick = { goBackCallback() }

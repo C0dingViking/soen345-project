@@ -16,16 +16,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,9 +37,12 @@ import com.spinachtesters.spinachbooking.domain.models.FilmDetails
 import com.spinachtesters.spinachbooking.domain.models.SportDetails
 import com.spinachtesters.spinachbooking.domain.models.TheaterDetails
 import com.spinachtesters.spinachbooking.ui.components.MinimalTopBar
+import com.spinachtesters.spinachbooking.ui.navigation.Screen
 import com.spinachtesters.spinachbooking.ui.theme.Background
 import com.spinachtesters.spinachbooking.ui.theme.ButtonYellow
 import com.spinachtesters.spinachbooking.ui.theme.PoppinsFontFamily
+import com.spinachtesters.spinachbooking.ui.theme.PrimaryGreen
+import com.spinachtesters.spinachbooking.ui.theme.TextGray
 import com.spinachtesters.spinachbooking.ui.theme.TextGreen
 import com.spinachtesters.spinachbooking.ui.viewmodels.EventDetailDialogState
 import com.spinachtesters.spinachbooking.ui.viewmodels.EventDetailViewModel
@@ -61,8 +60,11 @@ fun EventDetailScreen(
         viewModel.loadEvent(eventId)
     }
 
-    var alertsEnabled by remember(uiState.event?.id, uiState.isBooked) {
-        mutableStateOf(uiState.isBooked) // FIXME: no way to store the alerts atm
+    LaunchedEffect(uiState.shouldNavigateHome) {
+        if (uiState.shouldNavigateHome) {
+            navController.popBackStack()
+            viewModel.resetNavigation()
+        }
     }
 
     Scaffold(
@@ -82,7 +84,7 @@ fun EventDetailScreen(
                         .padding(innerPadding),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "Loading event...", color = TextGreen)
+                    Text(text = "Loading event...")
                 }
             }
 
@@ -94,7 +96,7 @@ fun EventDetailScreen(
                         .padding(innerPadding),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = uiState.errorMessage!!, color = TextGreen)
+                    Text(text = uiState.errorMessage!!)
                 }
             }
 
@@ -189,7 +191,6 @@ fun EventDetailScreen(
                         text = event.title,
                         fontSize = 30.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = TextGreen
                     )
 
                     Spacer(modifier = Modifier.height(20.dp))
@@ -205,41 +206,22 @@ fun EventDetailScreen(
                         value = event.startTime.format(DateTimeFormatter.ofPattern("HH:mm"))
                     )
 
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Text(text = "Alerts", color = TextGreen)
-                        Checkbox(
-                            checked = alertsEnabled,
-                            onCheckedChange = { checked ->
-                                if (uiState.isBooked) {
-                                    alertsEnabled = checked
-                                }
-                            },
-                            enabled = uiState.isBooked
-                        )
-                    }
-
                     Spacer(modifier = Modifier.height(24.dp))
 
                     Text(
                         text = "Description",
                         fontWeight = FontWeight.Medium,
-                        color = TextGreen
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = buildDescription(event),
-                        color = TextGreen
+                        color = PrimaryGreen
                     )
 
                     Spacer(modifier = Modifier.height(36.dp))
 
                     Button(
+                        modifier = Modifier.padding(25.dp),
                         onClick = {
                             if (uiState.isBooked) {
                                 viewModel.requestCancelConfirmation()
@@ -255,8 +237,6 @@ fun EventDetailScreen(
                             fontSize = 24.sp
                         )
                     }
-
-                    Spacer(modifier = Modifier.height(20.dp))
                 }
             }
 
@@ -283,8 +263,8 @@ private fun EventMetaRow(label: String, value: String) {
             .padding(vertical = 4.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(text = label, color = TextGreen, fontSize = 28.sp)
-        Text(text = value, color = TextGreen, fontSize = 28.sp)
+        Text(text = label, fontSize = 28.sp, color = TextGray)
+        Text(text = value, fontSize = 28.sp)
     }
 }
 

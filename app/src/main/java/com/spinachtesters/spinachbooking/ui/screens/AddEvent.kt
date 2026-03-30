@@ -51,6 +51,7 @@ import androidx.navigation.compose.rememberNavController
 import com.spinachtesters.spinachbooking.ui.components.DateSelector
 import com.spinachtesters.spinachbooking.ui.components.MinimalTopBar
 import com.spinachtesters.spinachbooking.ui.components.TimeSelector
+import com.spinachtesters.spinachbooking.ui.theme.Background
 import com.spinachtesters.spinachbooking.ui.theme.PoppinsFontFamily
 import com.spinachtesters.spinachbooking.ui.theme.PrimaryGreen
 import com.spinachtesters.spinachbooking.ui.theme.SecondaryGreen
@@ -67,9 +68,17 @@ fun AddEventScreenPreview() {
 @Composable
 fun AddEventScreen(
     navController: NavController,
-    viewModel: AddEventViewModel = viewModel()
+    viewModel: AddEventViewModel = viewModel(),
+    eventId: String? = null,
+    isModifyMode: Boolean = false
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(isModifyMode, eventId) {
+        if (isModifyMode) {
+            viewModel.loadEventForEditing(eventId)
+        }
+    }
 
     LaunchedEffect(uiState.isSuccess) {
         if (uiState.isSuccess) {
@@ -85,6 +94,7 @@ fun AddEventScreen(
         content = { innerPadding ->
             Column(
                 modifier = Modifier
+                    .background(Background)
                     .fillMaxSize()
                     .padding(innerPadding)
                     .padding(16.dp),
@@ -104,7 +114,7 @@ fun AddEventScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Add New Event",
+                        text = if (isModifyMode) "Modify Event" else "Add New Event",
                         fontFamily = PoppinsFontFamily,
                         fontSize = 20.sp,
                         color = Color.White,
@@ -356,7 +366,13 @@ fun AddEventScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Button(
-                        onClick = { viewModel.addEvent() },
+                        onClick = {
+                            if (isModifyMode) {
+                                viewModel.updateEvent()
+                            } else {
+                                viewModel.addEvent()
+                            }
+                        },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFFFFC857)
                         ),
@@ -367,7 +383,7 @@ fun AddEventScreen(
                         contentPadding = PaddingValues(0.dp)
                     ) {
                         Text(
-                            text = "Add Event",
+                            text = if (isModifyMode) "Update Event" else "Add Event",
                             color = Color.Black,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold

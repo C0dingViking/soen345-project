@@ -5,12 +5,15 @@ import com.spinachtesters.spinachbooking.data.repositories.EventRepository
 import com.spinachtesters.spinachbooking.domain.models.ConcertDetails
 import com.spinachtesters.spinachbooking.domain.models.Event
 import com.spinachtesters.spinachbooking.domain.models.FilmDetails
+import com.spinachtesters.spinachbooking.domain.models.SportDetails
 import com.spinachtesters.spinachbooking.testutils.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkStatic
+import io.mockk.Runs
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -23,6 +26,7 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -145,6 +149,151 @@ class AddEventValidationTests {
 
         viewModel.consumeSuccess()
         assertFalse(viewModel.uiState.value.isSuccess)
+    }
+
+    @Test
+    @DisplayName("loadEventForEditing() pre-populates fields from repository event")
+    fun loadEventForEditingPrepopulatesFields() = runTest {
+        val event = Event(
+            id = "event-123",
+            title = "Interstellar",
+            date = LocalDate.of(2026, 5, 10),
+            startTime = LocalDateTime.of(2026, 5, 10, 18, 0),
+            endTime = LocalDateTime.of(2026, 5, 10, 20, 30),
+            ticketPrice = 42.5,
+            location = "Montreal",
+            status = "Open",
+            details = FilmDetails(
+                id = "details-123",
+                director = "Nolan",
+                runtimeMin = 150,
+                rating = 5,
+                genre = "SciFi"
+            )
+        )
+
+        coEvery { eventRepository.getById("event-123") } returns event
+
+        viewModel.loadEventForEditing("event-123")
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertEquals("Interstellar", state.eventName)
+        assertEquals("42.5", state.ticketPrice)
+        assertEquals("Film", state.eventType)
+        assertEquals("2026-5-10", state.date)
+        assertEquals("18:00", state.timeStart)
+        assertEquals("20:30", state.timeEnd)
+        assertEquals("Montreal", state.location)
+        assertEquals("Nolan", state.filmDirector)
+        assertEquals("5", state.filmRating)
+        assertEquals("SciFi", state.filmGenre)
+        assertNull(state.errorMessage)
+    }
+
+    @Test
+    @DisplayName("updateEvent() saves modified event with existing ids")
+    fun updateEventSavesWithExistingIds() = runTest {
+        val event = Event(
+            id = "event-321",
+            title = "Old Title",
+            date = LocalDate.of(2026, 6, 1),
+            startTime = LocalDateTime.of(2026, 6, 1, 18, 0),
+            endTime = LocalDateTime.of(2026, 6, 1, 20, 0),
+            ticketPrice = 30.0,
+            location = "Old Place",
+            status = "BOOKED",
+            details = ConcertDetails(
+                id = "details-321",
+                mainArtist = "Old Artist",
+                genre = "Pop"
+            )
+        )
+
+        coEvery { eventRepository.getById("event-321") } returns event
+        coEvery { eventRepository.deleteConcreteDetailsByType(any(), any()) } just Runs
+        coEvery { eventRepository.save(any(), any()) } just Runs
+
+        viewModel.loadEventForEditing("event-321")
+        advanceUntilIdle()
+
+        viewModel.onEventNameChanged("New Title")
+        viewModel.onTicketPriceChanged("55")
+        viewModel.onEventLocationChanged("Bell Centre")
+        viewModel.onConcertArtistChanged("New Artist")
+        viewModel.onConcertGenreChanged("Rock")
+
+        viewModel.updateEvent()
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) {
+            eventRepository.save(
+                "event-321",
+                match {
+                    it.id == "event-321" &&
+                        it.title == "New Title" &&
+                        it.status == "BOOKED" &&
+                        it.details.id == "details-321" &&
+                        (it.details as ConcertDetails).mainArtist == "New Artist"
+                }
+            )
+        }
+        coVerify(exactly = 0) { eventRepository.deleteConcreteDetailsByType(any(), any()) }
+    }
+
+    @Test
+    @DisplayName("updateEvent() deletes old concrete details when event type changes")
+    fun updateEventDeletesOldConcreteDetailsWhenTypeChanges() = runTest {
+        val event = Event(
+            id = "event-654",
+            title = "Old Match",
+            date = LocalDate.of(2026, 7, 1),
+            startTime = LocalDateTime.of(2026, 7, 1, 18, 0),
+            endTime = LocalDateTime.of(2026, 7, 1, 20, 0),
+            ticketPrice = 20.0,
+            location = "Montreal",
+            status = "Open",
+            details = SportDetails(
+                id = "details-654",
+                sportType = "Hockey",
+                homeTeam = "Habs",
+                visitingTeam = "Rangers",
+                league = "NHL"
+            )
+        )
+
+        coEvery { eventRepository.getById("event-654") } returns event
+        coEvery { eventRepository.deleteConcreteDetailsByType(any(), any()) } just Runs
+        coEvery { eventRepository.save(any(), any()) } just Runs
+
+        viewModel.loadEventForEditing("event-654")
+        advanceUntilIdle()
+
+        viewModel.onEventTypeChanged("Concert")
+        viewModel.onConcertArtistChanged("Coldplay")
+        viewModel.onConcertGenreChanged("Rock")
+
+        viewModel.updateEvent()
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) { eventRepository.deleteConcreteDetailsByType("details-654", "sport") }
+        coVerify(exactly = 1) {
+            eventRepository.save(
+                "event-654",
+                match { it.details is ConcertDetails && it.details.id == "details-654" }
+            )
+        }
+    }
+
+    @Test
+    @DisplayName("loadEventForEditing() sets error when event id does not exist")
+    fun loadEventForEditingMissingEventSetsError() = runTest {
+        coEvery { eventRepository.getById("missing") } returns null
+
+        viewModel.loadEventForEditing("missing")
+        advanceUntilIdle()
+
+        assertEquals("Event not found.", viewModel.uiState.value.errorMessage)
     }
 
 }

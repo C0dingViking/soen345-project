@@ -55,6 +55,11 @@ class AddEventViewModel(
 ): ViewModel() {
     private val _uiState = MutableStateFlow(AddEventUiState())
     val uiState: StateFlow<AddEventUiState> = _uiState.asStateFlow()
+    private var editingEventId: String? = null
+    private var editingDetailsId: String? = null
+    private var editingDetailType: String? = null
+    private var editingStatus: String = "Open"
+    private var loadedEventId: String? = null
 
     fun onEventNameChanged(value: String) { _uiState.update { it.copy(eventName = value, errorMessage = null) } }
     fun onTicketPriceChanged(value: String) { _uiState.update { it.copy(ticketPrice = value, errorMessage = null) } }
@@ -74,6 +79,42 @@ class AddEventViewModel(
     fun onFilmGenreChanged(value: String) { _uiState.update { it.copy(filmGenre = value, errorMessage = null) } }
     fun onConcertArtistChanged(value: String) { _uiState.update { it.copy(concertMainArtist = value, errorMessage = null) } }
     fun onConcertGenreChanged(value: String) { _uiState.update { it.copy(concertGenre = value, errorMessage = null) } }
+
+    fun loadEventForEditing(eventId: String?) {
+        if (eventId.isNullOrBlank() || loadedEventId == eventId) return
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+            try {
+                val event = eventRepository.getById(eventId)
+                if (event == null) {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = "Event not found."
+                        )
+                    }
+                    return@launch
+                }
+
+                editingEventId = event.id
+                editingDetailsId = event.details.id
+                editingDetailType = event.details.detailType
+                editingStatus = event.status
+                loadedEventId = event.id
+
+                _uiState.value = event.toUiState()
+            } catch (exception: Exception) {
+                Log.e(TAG, "Load event for edit failed", exception)
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = "Failed to load event."
+                    )
+                }
+            }
+        }
+    }
 
     fun addEvent() {
         val state = _uiState.value
@@ -151,6 +192,100 @@ class AddEventViewModel(
         }
     }
 
+    fun updateEvent() {
+        val eventId = editingEventId
+        val detailsId = editingDetailsId
+        if (eventId.isNullOrBlank() || detailsId.isNullOrBlank()) {
+            _uiState.update { it.copy(errorMessage = "Missing event to modify.") }
+            return
+        }
+
+        val state = _uiState.value
+        if (state.isLoading) return
+
+        val validationError = validate(state)
+        if (validationError != null) {
+            _uiState.update { it.copy(errorMessage = validationError) }
+            return
+        }
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, errorMessage = null, isSuccess = false) }
+            try {
+                val date = LocalDate.parse(state.date, DATE_FORMATTER)
+                val startTime = LocalTime.parse(state.timeStart, TIME_FORMATTER)
+                val endTime = LocalTime.parse(state.timeEnd, TIME_FORMATTER)
+                val durationMin = Duration.between(startTime, endTime).toMinutes().toInt()
+                val newDetailType = mapFormTypeToDetailType(state.eventType)
+
+                if (!editingDetailType.isNullOrBlank() && editingDetailType != newDetailType) {
+                    eventRepository.deleteConcreteDetailsByType(detailsId, editingDetailType!!)
+                }
+
+                val details = when (state.eventType) {
+                    "Sports" -> SportDetails(
+                        id = detailsId,
+                        sportType = state.sportType.trim(),
+                        homeTeam = state.sportHomeTeam.trim(),
+                        visitingTeam = state.sportVisitingTeam.trim(),
+                        league = state.sportLeague.trim()
+                    )
+                    "Film" -> FilmDetails(
+                        id = detailsId,
+                        director = state.filmDirector.trim(),
+                        runtimeMin = durationMin,
+                        rating = state.filmRating.toInt(),
+                        genre = state.filmGenre.trim()
+                    )
+                    "Concert" -> ConcertDetails(
+                        id = detailsId,
+                        mainArtist = state.concertMainArtist.trim(),
+                        genre = state.concertGenre.trim()
+                    )
+                    "Theater" -> TheaterDetails(
+                        id = detailsId,
+                        writer = state.theaterWriter.trim(),
+                        genre = state.theaterGenre.trim(),
+                        durationMin = durationMin
+                    )
+                    else -> null
+                }
+
+                if (details == null) throw Exception("Failed making the concrete event details.")
+
+                val event = Event(
+                    id = eventId,
+                    title = state.eventName.trim(),
+                    date = date,
+                    startTime = LocalDateTime.of(date, startTime),
+                    endTime = LocalDateTime.of(date, endTime),
+                    ticketPrice = state.ticketPrice.toDouble(),
+                    location = state.location.trim(),
+                    status = editingStatus,
+                    details = details
+                )
+
+                eventRepository.save(eventId, event)
+                editingDetailType = newDetailType
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        isSuccess = true,
+                        errorMessage = null
+                    )
+                }
+            } catch (exception: Exception) {
+                Log.e(TAG, "Modify Event failed", exception)
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = "Failed to update event."
+                    )
+                }
+            }
+        }
+    }
+
     fun validate(state: AddEventUiState): String? {
         if (state.eventName.isBlank()) return "Event Name is required."
         if (state.ticketPrice.isBlank()) return "Ticket Price is required."
@@ -194,10 +329,69 @@ class AddEventViewModel(
         _uiState.update { it.copy(isSuccess = false) }
     }
 
-    private companion object {
+    companion object {
         const val TAG = "AddEventViewModel"
         val DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-M-d")
         val TIME_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+
+        fun mapDetailTypeToFormType(detailType: String): String {
+            return when (detailType.lowercase()) {
+                "sport" -> "Sports"
+                "film" -> "Film"
+                "concert" -> "Concert"
+                "theater" -> "Theater"
+                else -> ""
+            }
+        }
+
+        fun mapFormTypeToDetailType(formType: String): String {
+            return when (formType) {
+                "Sports" -> "sport"
+                "Film" -> "film"
+                "Concert" -> "concert"
+                "Theater" -> "theater"
+                else -> ""
+            }
+        }
     }
 
 }
+
+private fun Event.toUiState(): AddEventUiState {
+    val base = AddEventUiState(
+        eventName = title,
+        ticketPrice = if (ticketPrice % 1.0 == 0.0) ticketPrice.toInt().toString() else ticketPrice.toString(),
+        eventType = AddEventViewModel.mapDetailTypeToFormType(details.detailType),
+        date = date.format(AddEventViewModel.DATE_FORMATTER),
+        timeStart = startTime.format(AddEventViewModel.TIME_FORMATTER),
+        timeEnd = endTime.format(AddEventViewModel.TIME_FORMATTER),
+        location = location,
+        errorMessage = null,
+        isLoading = false,
+        isSuccess = false
+    )
+
+    return when (val concreteDetails = details) {
+        is TheaterDetails -> base.copy(
+            theaterWriter = concreteDetails.writer,
+            theaterGenre = concreteDetails.genre
+        )
+        is SportDetails -> base.copy(
+            sportType = concreteDetails.sportType,
+            sportHomeTeam = concreteDetails.homeTeam,
+            sportVisitingTeam = concreteDetails.visitingTeam,
+            sportLeague = concreteDetails.league
+        )
+        is FilmDetails -> base.copy(
+            filmDirector = concreteDetails.director,
+            filmRating = concreteDetails.rating.toString(),
+            filmGenre = concreteDetails.genre
+        )
+        is ConcertDetails -> base.copy(
+            concertMainArtist = concreteDetails.mainArtist,
+            concertGenre = concreteDetails.genre
+        )
+        else -> base
+    }
+}
+

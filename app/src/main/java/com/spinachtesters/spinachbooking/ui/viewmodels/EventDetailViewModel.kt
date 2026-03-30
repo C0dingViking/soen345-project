@@ -12,14 +12,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.UUID
 
 data class EventDetailUiState(
     val event: Event? = null,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val isBooked: Boolean = false,
-    val dialogState: EventDetailDialogState = EventDetailDialogState.None
+    val dialogState: EventDetailDialogState = EventDetailDialogState.None,
+    val shouldNavigateHome: Boolean = false
 )
 
 sealed class EventDetailDialogState {
@@ -152,7 +152,7 @@ class EventDetailViewModel(
 
         viewModelScope.launch {
             try {
-                val bookingId = UUID.randomUUID().toString()
+                val bookingId = generateBookingId(currentUserId, event.id)
                 val booking = Booking(
                     bookedBy = currentUserId,
                     bookedFor = event.id,
@@ -163,7 +163,8 @@ class EventDetailViewModel(
                 _uiState.update {
                     it.copy(
                         isBooked = true,
-                        dialogState = EventDetailDialogState.None
+                        dialogState = EventDetailDialogState.None,
+                        shouldNavigateHome = true
                     )
                 }
             } catch (_: Exception) {
@@ -199,7 +200,8 @@ class EventDetailViewModel(
                     _uiState.update {
                         it.copy(
                             isBooked = false,
-                            dialogState = EventDetailDialogState.None
+                            dialogState = EventDetailDialogState.None,
+                            shouldNavigateHome = true
                         )
                     }
                 } else {
@@ -221,6 +223,10 @@ class EventDetailViewModel(
 
     fun dismissDialog() {
         _uiState.update { it.copy(dialogState = EventDetailDialogState.None) }
+    }
+
+    fun resetNavigation() {
+        _uiState.update { it.copy(shouldNavigateHome = false) }
     }
 
     private suspend fun checkIfUserHasBooked(userId: String, eventId: String): Boolean {
