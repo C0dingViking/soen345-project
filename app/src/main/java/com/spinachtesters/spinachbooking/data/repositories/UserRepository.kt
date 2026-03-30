@@ -39,6 +39,15 @@ class UserRepository(
         return saved
     }
 
+    suspend fun deleteById(id: String) {
+        source.deleteById(id)
+    }
+
+    suspend fun findByUsername(username: String): User? {
+        val normalized = username.trim()
+        return getAll().firstOrNull { it.username.equals(normalized, ignoreCase = true) }
+    }
+
     suspend fun findByLoginIdentifier(identifier: String): User? {
         val normalized = identifier.trim()
         return getAll().firstOrNull {
