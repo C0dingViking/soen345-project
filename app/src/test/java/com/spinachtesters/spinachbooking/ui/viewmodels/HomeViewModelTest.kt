@@ -1,6 +1,5 @@
 package com.spinachtesters.spinachbooking.ui.viewmodels
 
-import androidx.navigation.safe.args.generator.models.Argument
 import com.spinachtesters.spinachbooking.data.repositories.BookingRepository
 import com.spinachtesters.spinachbooking.data.repositories.EventRepository
 import com.spinachtesters.spinachbooking.data.session.SessionManager
@@ -11,9 +10,6 @@ import com.spinachtesters.spinachbooking.domain.models.FilmDetails
 import com.spinachtesters.spinachbooking.domain.models.SportDetails
 import com.spinachtesters.spinachbooking.domain.models.TheaterDetails
 import com.spinachtesters.spinachbooking.testutils.MainDispatcherRule
-import com.spinachtesters.spinachbooking.ui.screens.sampleEvents
-import com.spinachtesters.spinachbooking.ui.viewmodels.EventFilter
-import io.mockk.InternalPlatformDsl.toStr
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk

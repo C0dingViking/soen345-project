@@ -227,7 +227,9 @@ fun HomeScreen(
                             color = Color.Red,
                             fontFamily = PoppinsFontFamily,
                             fontSize = 13.sp,
-                            modifier = Modifier.fillMaxWidth(0.90f),
+                            modifier = Modifier
+                                .fillMaxWidth(0.90f)
+                                .testTag("filter_error_message"),
                             textAlign = TextAlign.Center
                         )
                         Spacer(modifier = Modifier.height(6.dp))
@@ -245,6 +247,7 @@ fun HomeScreen(
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = ButtonYellow
                             ),
+                            modifier = Modifier.testTag("search_button")
                         ) {
                             Text("Search")
                         }
@@ -259,6 +262,7 @@ fun HomeScreen(
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = ButtonCancelRed
                             ),
+                            modifier = Modifier.testTag("cancel_button")
                         ) {
                             Text("Cancel")
                         }
@@ -413,7 +417,8 @@ fun HomeScreen(
                                 contentColor = ButtonCancelRed
                             ),
                             border = BorderStroke(1.dp, ButtonCancelRed),
-                            shape = RoundedCornerShape(20.dp)
+                            shape = RoundedCornerShape(20.dp),
+                            modifier = Modifier.testTag("clear_button")
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
