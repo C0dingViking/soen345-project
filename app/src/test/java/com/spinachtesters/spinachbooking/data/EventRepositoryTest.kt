@@ -222,4 +222,18 @@ class EventRepositoryTest {
         coVerify(exactly = 0) { fakeTheaterSrc.deleteById(any()) }
         coVerify(exactly = 0) { fakeConcertSrc.deleteById(any()) }
     }
+
+    @Test
+    @DisplayName("deleteConcreteDetailsByType deletes only the requested concrete detail source")
+    fun deleteConcreteDetailsByTypeDeletesOnlyTargetSource() = runTest {
+        coEvery { fakeTheaterSrc.deleteById("details-55") } just Runs
+
+        repo.deleteConcreteDetailsByType("details-55", "theater")
+
+        coVerify(exactly = 1) { fakeTheaterSrc.deleteById("details-55") }
+        coVerify(exactly = 0) { fakeSportSrc.deleteById(any()) }
+        coVerify(exactly = 0) { fakeFilmSrc.deleteById(any()) }
+        coVerify(exactly = 0) { fakeConcertSrc.deleteById(any()) }
+        coVerify(exactly = 0) { fakeDetailsSrc.deleteById(any()) }
+    }
 }

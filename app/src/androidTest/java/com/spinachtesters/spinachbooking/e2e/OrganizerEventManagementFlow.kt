@@ -4,6 +4,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -13,9 +14,11 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
+import androidx.navigation.NavType
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import androidx.navigation.testing.TestNavHostController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.spinachtesters.spinachbooking.data.repositories.EventRepository
@@ -29,9 +32,12 @@ import com.spinachtesters.spinachbooking.ui.viewmodels.AddEventViewModel
 import com.spinachtesters.spinachbooking.ui.viewmodels.LoginViewModel
 import com.spinachtesters.spinachbooking.ui.viewmodels.ManageEventsViewModel
 import com.spinachtesters.spinachbooking.ui.viewmodels.SignUpViewModel
+import com.spinachtesters.spinachbooking.domain.models.Event
+import com.spinachtesters.spinachbooking.domain.models.FilmDetails
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -74,6 +80,17 @@ class OrganizerEventManagementFlow {
                 composable(Screen.Login.route) { LoginScreen(navController = navController, viewModel = loginViewModel) }
                 composable(Screen.ManageEvents.route) { ManageEventsScreen(navController = navController, viewModel = manageEventsViewModel) }
                 composable(Screen.AddEvent.route) { AddEventScreen(navController = navController, viewModel = addEventViewModel) }
+                composable(
+                    route = Screen.ModifyEvent.route,
+                    arguments = listOf(navArgument("eventId") { type = NavType.StringType })
+                ) { backStackEntry ->
+                    AddEventScreen(
+                        navController = navController,
+                        viewModel = addEventViewModel,
+                        eventId = backStackEntry.arguments?.getString("eventId"),
+                        isModifyMode = true
+                    )
+                }
             }
         }
     }
@@ -171,6 +188,97 @@ class OrganizerEventManagementFlow {
         composeRule.onNodeWithText("Add Event").performClick()
 
         composeRule.onNodeWithText("Event Type is required.").assertIsDisplayed()
+    }
+
+    @Test
+    fun organizer_modifyEvent_basicModification_persistsUpdatedValues() {
+        signUpAndLoginOrganizer()
+
+        val stamp = System.currentTimeMillis().toString().takeLast(6)
+        val originalTitle = "MB$stamp"
+        val updatedTitle = "MU$stamp"
+
+        addConcertEvent(originalTitle)
+        assertEventVisible(originalTitle)
+
+        openModifyEventByTitle(originalTitle)
+        setText("create_name_input", updatedTitle)
+        setText("create_price_input", "60")
+        setText("create_location_input", "Quebec")
+        composeRule.onNodeWithText("Update Event").performClick()
+        waitForRoute(Screen.ManageEvents.route)
+
+        createdEventTitles += updatedTitle
+
+        assertEventNotVisible(originalTitle)
+        assertEventVisible(updatedTitle)
+
+        val updatedEvent = waitForEventByTitle(updatedTitle)
+        assertEquals("Quebec", updatedEvent.location)
+        assertEquals(60.0, updatedEvent.ticketPrice, 0.0)
+        assertEquals("concert", updatedEvent.details.detailType)
+    }
+
+    @Test
+    fun organizer_modifyEvent_changeType_concertToFilm_persistsFilmDetails() {
+        signUpAndLoginOrganizer()
+
+        val stamp = System.currentTimeMillis().toString().takeLast(6)
+        val originalTitle = "TC$stamp"
+        val updatedTitle = "TF$stamp"
+
+        addConcertEvent(originalTitle)
+        assertEventVisible(originalTitle)
+
+        openModifyEventByTitle(originalTitle)
+        setText("create_name_input", updatedTitle)
+        composeRule.onNodeWithTag("create_eventType_input").performClick()
+        composeRule.onNodeWithText("Film").performClick()
+
+        scrollToTag("create_director_input")
+        setText("create_director_input", "Villeneuve")
+        scrollToTag("create_rating_input")
+        setText("create_rating_input", "4")
+        scrollToTag("create_genre_input")
+        setText("create_genre_input", "Drama")
+
+        composeRule.onNodeWithText("Update Event").performClick()
+        waitForRoute(Screen.ManageEvents.route)
+
+        createdEventTitles += updatedTitle
+
+        val updatedEvent = waitForEventByTitle(updatedTitle)
+        assertEquals("film", updatedEvent.details.detailType)
+        assertTrue(updatedEvent.details is FilmDetails)
+
+        val filmDetails = updatedEvent.details as FilmDetails
+        assertEquals("Villeneuve", filmDetails.director)
+        assertEquals(4, filmDetails.rating)
+        assertEquals("Drama", filmDetails.genre)
+    }
+
+    @Test
+    fun organizer_modifyEvent_noModification_arrowBackKeepsEventUnchanged() {
+        signUpAndLoginOrganizer()
+
+        val title = "NB${System.currentTimeMillis().toString().takeLast(6)}"
+        addConcertEvent(title)
+        assertEventVisible(title)
+
+        val before = waitForEventByTitle(title)
+
+        openModifyEventByTitle(title)
+        composeRule.onNodeWithTag("topbar_back_button").performClick()
+        waitForRoute(Screen.ManageEvents.route)
+
+        assertEventVisible(title)
+
+        val after = waitForEventByTitle(title)
+        assertEquals(before.id, after.id)
+        assertEquals(before.title, after.title)
+        assertEquals(before.location, after.location)
+        assertEquals(before.ticketPrice, after.ticketPrice, 0.0)
+        assertEquals(before.details.detailType, after.details.detailType)
     }
 
     private fun signUpAndLoginOrganizer() {
@@ -307,6 +415,34 @@ class OrganizerEventManagementFlow {
         }
         composeRule.runOnIdle {
             assertEquals(route, navController.currentBackStackEntry?.destination?.route)
+        }
+    }
+
+    private fun openModifyEventByTitle(title: String) {
+        composeRule.onNodeWithTag("manage_events_list")
+            .performScrollToNode(hasText(title))
+        composeRule.onNodeWithText(title)
+            .performClick()
+        waitForModifyRoute()
+    }
+
+    private fun waitForEventByTitle(title: String): Event {
+        var found: Event? = null
+        composeRule.waitUntil(20_000) {
+            found = runBlocking {
+                eventRepository.getAll().firstOrNull { it.title == title }
+            }
+            found != null
+        }
+        return found!!
+    }
+
+    private fun waitForModifyRoute() {
+        composeRule.waitUntil(20_000) {
+            navController.currentBackStackEntry?.destination?.route == Screen.ModifyEvent.route
+        }
+        composeRule.runOnIdle {
+            assertEquals(Screen.ModifyEvent.route, navController.currentBackStackEntry?.destination?.route)
         }
     }
 }

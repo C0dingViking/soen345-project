@@ -1,6 +1,7 @@
 package com.spinachtesters.spinachbooking.ui.components.cards
 
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -59,6 +60,7 @@ fun EditableEventCardPreview() {
 @Composable
 fun EditableEventCard(
     subject: Event,
+    clickCardCallback: () -> Unit = {},
     clickDeleteCallback: () -> Unit
 ) {
     val title = subject.title;
@@ -70,7 +72,8 @@ fun EditableEventCard(
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 6.dp),
+            .padding(vertical = 6.dp)
+            .clickable { clickCardCallback() },
         colors = CardDefaults.cardColors(containerColor = BackgroundGrey)
     ) {
         Row(

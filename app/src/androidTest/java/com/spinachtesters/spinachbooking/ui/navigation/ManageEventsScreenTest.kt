@@ -1,12 +1,15 @@
 package com.spinachtesters.spinachbooking.ui.navigation
 
 import androidx.activity.ComponentActivity
+import androidx.compose.material3.Text
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.navigation.compose.ComposeNavigator
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.testing.TestNavHostController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.spinachtesters.spinachbooking.data.repositories.EventRepository
@@ -58,10 +61,20 @@ class ManageEventsScreenTest {
                 navigatorProvider.addNavigator(ComposeNavigator())
             }
 
-            ManageEventsScreen(
+            NavHost(
                 navController = navController,
-                viewModel = viewModel
-            )
+                startDestination = "manage_events"
+            ) {
+                composable("manage_events") {
+                    ManageEventsScreen(
+                        navController = navController,
+                        viewModel = viewModel
+                    )
+                }
+                composable("modify_event/{eventId}") { backStackEntry ->
+                    Text("Modify ${backStackEntry.arguments?.getString("eventId")}")
+                }
+            }
         }
     }
 
@@ -100,6 +113,16 @@ class ManageEventsScreenTest {
             .performClick()
 
         coVerify { eventRepository.deleteById("1") }
+    }
+
+    @Test
+    fun clickingEventCardNavigatesToModifyEvent() {
+
+        composeRule.onNodeWithText("Test Event")
+            .performClick()
+
+        composeRule.onNodeWithText("Modify 1")
+            .assertExists()
     }
 
 }

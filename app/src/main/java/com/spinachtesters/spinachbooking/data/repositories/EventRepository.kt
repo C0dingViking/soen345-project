@@ -84,6 +84,16 @@ class EventRepository(
         eventSrc.deleteById(id)
     }
 
+    suspend fun deleteConcreteDetailsByType(detailsId: String, detailType: String) {
+        when (detailType.lowercase()) {
+            "sport" -> sportSrc.deleteById(detailsId)
+            "film" -> filmSrc.deleteById(detailsId)
+            "theater" -> theaterSrc.deleteById(detailsId)
+            "concert" -> concertSrc.deleteById(detailsId)
+            else -> return
+        }
+    }
+
     private suspend fun deleteConcreteDetails(detailsId: String) {
         val eventDetailsDTO = detailsSrc.getById(detailsId) ?: return
 
