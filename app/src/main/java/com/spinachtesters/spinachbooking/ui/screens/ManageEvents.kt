@@ -45,6 +45,7 @@ import androidx.navigation.compose.rememberNavController
 import com.spinachtesters.spinachbooking.domain.models.Event
 import com.spinachtesters.spinachbooking.ui.components.MinimalTopBar
 import com.spinachtesters.spinachbooking.ui.components.cards.EditableEventCard
+import com.spinachtesters.spinachbooking.ui.navigation.Screen
 import com.spinachtesters.spinachbooking.ui.theme.Background
 import com.spinachtesters.spinachbooking.ui.theme.PoppinsFontFamily
 import com.spinachtesters.spinachbooking.ui.viewmodels.ManageEventsViewModel
@@ -128,6 +129,9 @@ fun ManageEventsScreen(
                             items(uiState.events!!) { event ->
                                 EditableEventCard(
                                     subject = event,
+                                    clickCardCallback = {
+                                        navController.navigate(Screen.ModifyEvent.createRoute(event.id))
+                                    },
                                     clickDeleteCallback = { eventToDelete = event }
                                 )
                             }
