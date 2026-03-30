@@ -14,6 +14,7 @@ data class EventFilter(
     val startTime: String = "",
     val endTime: String = "",
     val location: String = "",
+    val isOpenOnly: Boolean = true,
     val eventType: String = "",
 
     val theaterWriter: String = "",
@@ -42,6 +43,7 @@ data class FilterEventUiState(
     val start: String = "",
     val end: String = "",
     val location: String = "",
+    val isOpenOnly: Boolean = true,
     val eventType: String = "",
 
     val theaterWriter: String = "",
@@ -92,6 +94,7 @@ class FilterEventViewModel(): ViewModel() {
     fun onFilmGenreChanged(value: String) { _uiState.update { it.copy(filmGenre = value,  isError = false) } }
     fun onConcertArtistChanged(value: String) { _uiState.update { it.copy(concertMainArtist = value,  isError = false) } }
     fun onConcertGenreChanged(value: String) { _uiState.update { it.copy(concertGenre = value,  isError = false) } }
+    fun onIsOnlyOpenChanged(value: Boolean) { _uiState.update { it.copy(isOpenOnly = value, isError = false) }}
 
     private fun update(transform: (FilterEventUiState) -> FilterEventUiState) {
         _uiState.update(transform)
@@ -161,6 +164,7 @@ class FilterEventViewModel(): ViewModel() {
             startTime = startTime,
             endTime = endTime,
             location = value.location.trim(),
+            isOpenOnly = value.isOpenOnly,
             eventType = value.eventType,
 
             theaterWriter = value.theaterWriter.trim(),

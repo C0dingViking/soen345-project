@@ -129,9 +129,11 @@ class HomeViewModel(
 
         val locationMatch = filter.location.isBlank() || event.location.contains(filter.location, ignoreCase = true)
 
+        val statusMatch = !filter.isOpenOnly || event.status.equals("Open", ignoreCase = true)
+
         val typeMatch = filter.eventType.isBlank() || filter.eventType.equals(event.details.detailType, ignoreCase = true)
 
-        val typeSpecificMatch =  if (typeMatch) when (event.details.detailType) {
+        val typeSpecificMatch =  if (typeMatch) when (event.details.detailType.lowercase()) {
             "sport" -> {
                 val details = event.details as? SportDetails
                 details != null &&
@@ -185,6 +187,7 @@ class HomeViewModel(
                 startTimeMatch &&
                 endTimeMatch &&
                 locationMatch &&
+                statusMatch &&
                 typeMatch &&
                 typeSpecificMatch
     }

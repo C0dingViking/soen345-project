@@ -15,6 +15,7 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.ExposedDropdownMenuBox
 import androidx.compose.material.ExposedDropdownMenuDefaults
 import androidx.compose.material.TextField
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -292,6 +293,18 @@ fun FilterEventForm(
                         )
                     }
                 }
+            }
+        }
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(0.9f),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Checkbox(
+                    checked = uiState.isOpenOnly,
+                    onCheckedChange = viewModel::onIsOnlyOpenChanged
+                )
+                Text("Only show open events")
             }
         }
     }
