@@ -14,6 +14,7 @@ navigation = "2.8.0"
 navigationTesting = "2.8.0"
 runner = "1.6.1"
 foundation = "1.10.6"
+navigationSafeArgsGenerator = "2.9.7"
 
 [libraries]
 androidx-espresso-core-v361 = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCoreVersion" }
@@ -43,6 +44,7 @@ androidx-compose-material-icons-extended = { module = "androidx.compose.material
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
 androidx-navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "navigationTesting" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
+androidx-navigation-safe-args-generator = { group = "androidx.navigation", name = "navigation-safe-args-generator", version.ref = "navigationSafeArgsGenerator" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
