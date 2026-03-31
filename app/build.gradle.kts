@@ -1,11 +1,13 @@
 import org.jetbrains.kotlin.gradle.plugin.kotlinToolingVersion
 
 plugins {
-    id("com.google.gms.google-services")
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.gms.google-services")
     jacoco
 }
+
+apply(plugin = "androidx.navigation.safeargs.kotlin")
 
 val exclusions = listOf(
     "**/R.class",
@@ -72,7 +74,9 @@ dependencies {
     implementation(libs.androidx.compose.material)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.compose.foundation)
     testImplementation(libs.junit)
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.0")
     testRuntimeOnly(libs.junit.engine)
     testRuntimeOnly(libs.junit.platform.launcher)
     androidTestImplementation(libs.androidx.junit)
