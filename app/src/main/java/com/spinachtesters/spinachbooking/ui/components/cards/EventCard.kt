@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -62,6 +63,7 @@ fun EventCard(
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier
             .width(180.dp)
+            .testTag("available_event_card")
             .clickable { onClick() },
         colors = CardDefaults.cardColors(containerColor = BackgroundGrey),
     ) {

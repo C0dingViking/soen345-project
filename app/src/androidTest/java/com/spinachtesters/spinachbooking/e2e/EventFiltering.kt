@@ -109,6 +109,12 @@ class EventFiltering {
         composeRule.onNodeWithTag("home_screen_scaffold")
             .assertIsDisplayed()
 
+        composeRule.waitUntil(timeoutMillis = 10_000) {
+            composeRule
+                .onAllNodesWithTag("available_event_card")
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+
         composeRule.onNodeWithTag("search_bar")
             .performClick()
         composeRule.waitForIdle()
