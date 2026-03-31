@@ -5,6 +5,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -44,6 +45,130 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import java.time.LocalDate
 
+class OrganizerE2eActions(
+    private val composeRule: ComposeTestRule,
+    private val navControllerProvider: () -> TestNavHostController,
+    private val addEventViewModel: AddEventViewModel,
+    private val createdUsernames: MutableSet<String>,
+    private val createdEventTitles: MutableSet<String>
+) {
+    fun signUpAndLoginOrganizer() {
+        val stamp = System.currentTimeMillis().toString().takeLast(8)
+        val username = "org$stamp"
+        val email = "$username@mail.com"
+        val password = "StrongPass123!"
+
+        createdUsernames += username
+
+        composeRule.onNodeWithTag("signup_contact_input").performTextInput(email)
+        composeRule.onNodeWithTag("signup_fullname_input").performTextInput("Organizer $stamp")
+        composeRule.onNodeWithTag("signup_username_input").performTextInput(username)
+        composeRule.onNodeWithTag("signup_password_input").performTextInput(password)
+        composeRule.onNodeWithTag("signup_confirm_password_input").performTextInput(password)
+        composeRule.onNodeWithText("Organizer").performClick()
+        composeRule.onNodeWithTag("signup_submit_button").performClick()
+
+        waitForRoute(Screen.Login.route)
+
+        composeRule.onNodeWithTag("login_identifier_input").performTextInput(username)
+        composeRule.onNodeWithTag("login_password_input").performTextInput(password)
+        composeRule.onNodeWithTag("login_submit_button").performClick()
+
+        waitForRoute(Screen.ManageEvents.route)
+    }
+
+    fun addSportsEvent(title: String) {
+        openAddEvent()
+        fillCommonEventFields(title, "Sports")
+        scrollToTag("create_sport_input")
+        setText("create_sport_input", "Hockey")
+        scrollToTag("create_home team_input")
+        setText("create_home team_input", "Habs")
+        scrollToTag("create_visiting team_input")
+        setText("create_visiting team_input", "Rangers")
+        scrollToTag("create_league_input")
+        setText("create_league_input", "NHL")
+        submitAndWaitForManage(title)
+    }
+
+    fun addTheaterEvent(title: String) {
+        openAddEvent()
+        fillCommonEventFields(title, "Theater")
+        scrollToTag("create_writer_input")
+        setText("create_writer_input", "Miller")
+        scrollToTag("create_genre_input")
+        setText("create_genre_input", "Drama")
+        submitAndWaitForManage(title)
+    }
+
+    fun addConcertEvent(title: String) {
+        openAddEvent()
+        fillCommonEventFields(title, "Concert")
+        scrollToTag("create_artist_input")
+        setText("create_artist_input", "Coldplay")
+        scrollToTag("create_genre_input")
+        setText("create_genre_input", "Rock")
+        submitAndWaitForManage(title)
+    }
+
+    fun addFilmEvent(title: String) {
+        openAddEvent()
+        fillCommonEventFields(title, "Film")
+        scrollToTag("create_director_input")
+        setText("create_director_input", "Nolan")
+        scrollToTag("create_rating_input")
+        setText("create_rating_input", "5")
+        scrollToTag("create_genre_input")
+        setText("create_genre_input", "SciFi")
+        submitAndWaitForManage(title)
+    }
+
+    private fun openAddEvent() {
+        composeRule.onNodeWithContentDescription("Add Event").performClick()
+        waitForRoute(Screen.AddEvent.route)
+    }
+
+    private fun fillCommonEventFields(title: String, eventType: String) {
+        setText("create_name_input", title)
+        setText("create_price_input", "45")
+        composeRule.onNodeWithTag("create_eventType_input").performClick()
+        composeRule.onNodeWithText(eventType).performClick()
+
+        composeRule.runOnIdle {
+            val date = LocalDate.now().plusDays(1)
+            addEventViewModel.onEventDateChanged("${date.year}-${date.monthValue}-${date.dayOfMonth}")
+            addEventViewModel.onTimeStartChanged("18:00")
+            addEventViewModel.onTimeEndChanged("20:00")
+        }
+
+        setText("create_location_input", "Montreal")
+    }
+
+    private fun setText(tag: String, value: String) {
+        composeRule.onNodeWithTag(tag).performTextClearance()
+        composeRule.onNodeWithTag(tag).performTextInput(value)
+    }
+
+    private fun submitAndWaitForManage(title: String) {
+        createdEventTitles += title
+        composeRule.onNodeWithText("Add Event").performClick()
+        waitForRoute(Screen.ManageEvents.route)
+    }
+
+    private fun scrollToTag(tag: String) {
+        composeRule.onNodeWithTag("form").performScrollToNode(hasTestTag(tag))
+    }
+
+    private fun waitForRoute(route: String) {
+        composeRule.waitUntil(20_000) {
+            navControllerProvider().currentBackStackEntry?.destination?.route == route
+        }
+        composeRule.runOnIdle {
+            assertEquals(route, navControllerProvider().currentBackStackEntry?.destination?.route)
+        }
+    }
+}
+
 @RunWith(AndroidJUnit4::class)
 class OrganizerEventManagementFlow {
 
@@ -59,6 +184,8 @@ class OrganizerEventManagementFlow {
     private val createdUsernames = mutableSetOf<String>()
     private val createdEventTitles = mutableSetOf<String>()
 
+    private lateinit var organizerActions: OrganizerE2eActions
+
     @Before
     fun setup() {
         val sharedEventRepository = EventRepository()
@@ -66,6 +193,13 @@ class OrganizerEventManagementFlow {
         val loginViewModel = LoginViewModel()
         val manageEventsViewModel = ManageEventsViewModel(sharedEventRepository)
         addEventViewModel = AddEventViewModel(sharedEventRepository)
+        organizerActions = OrganizerE2eActions(
+            composeRule = composeRule,
+            navControllerProvider = { navController },
+            addEventViewModel = addEventViewModel,
+            createdUsernames = createdUsernames,
+            createdEventTitles = createdEventTitles
+        )
 
         composeRule.setContent {
             navController = TestNavHostController(LocalContext.current).apply {
@@ -76,10 +210,30 @@ class OrganizerEventManagementFlow {
                 navController = navController,
                 startDestination = Screen.SignUp.route
             ) {
-                composable(Screen.SignUp.route) { SignUpScreen(navController = navController, viewModel = signUpViewModel) }
-                composable(Screen.Login.route) { LoginScreen(navController = navController, viewModel = loginViewModel) }
-                composable(Screen.ManageEvents.route) { ManageEventsScreen(navController = navController, viewModel = manageEventsViewModel) }
-                composable(Screen.AddEvent.route) { AddEventScreen(navController = navController, viewModel = addEventViewModel) }
+                composable(Screen.SignUp.route) {
+                    SignUpScreen(
+                        navController = navController,
+                        viewModel = signUpViewModel
+                    )
+                }
+                composable(Screen.Login.route) {
+                    LoginScreen(
+                        navController = navController,
+                        viewModel = loginViewModel
+                    )
+                }
+                composable(Screen.ManageEvents.route) {
+                    ManageEventsScreen(
+                        navController = navController,
+                        viewModel = manageEventsViewModel
+                    )
+                }
+                composable(Screen.AddEvent.route) {
+                    AddEventScreen(
+                        navController = navController,
+                        viewModel = addEventViewModel
+                    )
+                }
                 composable(
                     route = Screen.ModifyEvent.route,
                     arguments = listOf(navArgument("eventId") { type = NavType.StringType })
@@ -281,96 +435,19 @@ class OrganizerEventManagementFlow {
         assertEquals(before.details.detailType, after.details.detailType)
     }
 
-    private fun signUpAndLoginOrganizer() {
-        val stamp = System.currentTimeMillis().toString().takeLast(8)
-        val username = "org$stamp"
-        val email = "$username@mail.com"
-        val password = "StrongPass123!"
+    fun signUpAndLoginOrganizer() = organizerActions.signUpAndLoginOrganizer()
 
-        createdUsernames += username
+    fun addSportsEvent(title: String) = organizerActions.addSportsEvent(title)
 
-        composeRule.onNodeWithTag("signup_contact_input").performTextInput(email)
-        composeRule.onNodeWithTag("signup_fullname_input").performTextInput("Organizer $stamp")
-        composeRule.onNodeWithTag("signup_username_input").performTextInput(username)
-        composeRule.onNodeWithTag("signup_password_input").performTextInput(password)
-        composeRule.onNodeWithTag("signup_confirm_password_input").performTextInput(password)
-        composeRule.onNodeWithText("Organizer").performClick()
-        composeRule.onNodeWithTag("signup_submit_button").performClick()
+    fun addTheaterEvent(title: String) = organizerActions.addTheaterEvent(title)
 
-        waitForRoute(Screen.Login.route)
+    fun addConcertEvent(title: String) = organizerActions.addConcertEvent(title)
 
-        composeRule.onNodeWithTag("login_identifier_input").performTextInput(username)
-        composeRule.onNodeWithTag("login_password_input").performTextInput(password)
-        composeRule.onNodeWithTag("login_submit_button").performClick()
-
-        waitForRoute(Screen.ManageEvents.route)
-    }
+    fun addFilmEvent(title: String) = organizerActions.addFilmEvent(title)
 
     private fun openAddEvent() {
         composeRule.onNodeWithContentDescription("Add Event").performClick()
         waitForRoute(Screen.AddEvent.route)
-    }
-
-    private fun addSportsEvent(title: String) {
-        openAddEvent()
-        fillCommonEventFields(title, "Sports")
-        scrollToTag("create_sport_input")
-        setText("create_sport_input", "Hockey")
-        scrollToTag("create_home team_input")
-        setText("create_home team_input", "Habs")
-        scrollToTag("create_visiting team_input")
-        setText("create_visiting team_input", "Rangers")
-        scrollToTag("create_league_input")
-        setText("create_league_input", "NHL")
-        submitAndWaitForManage(title)
-    }
-
-    private fun addTheaterEvent(title: String) {
-        openAddEvent()
-        fillCommonEventFields(title, "Theater")
-        scrollToTag("create_writer_input")
-        setText("create_writer_input", "Miller")
-        scrollToTag("create_genre_input")
-        setText("create_genre_input", "Drama")
-        submitAndWaitForManage(title)
-    }
-
-    private fun addConcertEvent(title: String) {
-        openAddEvent()
-        fillCommonEventFields(title, "Concert")
-        scrollToTag("create_artist_input")
-        setText("create_artist_input", "Coldplay")
-        scrollToTag("create_genre_input")
-        setText("create_genre_input", "Rock")
-        submitAndWaitForManage(title)
-    }
-
-    private fun addFilmEvent(title: String) {
-        openAddEvent()
-        fillCommonEventFields(title, "Film")
-        scrollToTag("create_director_input")
-        setText("create_director_input", "Nolan")
-        scrollToTag("create_rating_input")
-        setText("create_rating_input", "5")
-        scrollToTag("create_genre_input")
-        setText("create_genre_input", "SciFi")
-        submitAndWaitForManage(title)
-    }
-
-    private fun fillCommonEventFields(title: String, eventType: String) {
-        setText("create_name_input", title)
-        setText("create_price_input", "45")
-        composeRule.onNodeWithTag("create_eventType_input").performClick()
-        composeRule.onNodeWithText(eventType).performClick()
-
-        composeRule.runOnUiThread {
-            val date = LocalDate.now().plusDays(1)
-            addEventViewModel.onEventDateChanged("${date.year}-${date.monthValue}-${date.dayOfMonth}")
-            addEventViewModel.onTimeStartChanged("18:00")
-            addEventViewModel.onTimeEndChanged("20:00")
-        }
-
-        setText("create_location_input", "Montreal")
     }
 
     private fun setText(tag: String, value: String) {
@@ -442,7 +519,10 @@ class OrganizerEventManagementFlow {
             navController.currentBackStackEntry?.destination?.route == Screen.ModifyEvent.route
         }
         composeRule.runOnIdle {
-            assertEquals(Screen.ModifyEvent.route, navController.currentBackStackEntry?.destination?.route)
+            assertEquals(
+                Screen.ModifyEvent.route,
+                navController.currentBackStackEntry?.destination?.route
+            )
         }
     }
 }
