@@ -170,7 +170,9 @@ fun FilterEventForm(
                                 viewModel.onEventTypeChanged(option);
                                 expanded = false
                             },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("${option.lowercase()}_eventType_input")
                         )
                     }
                 }

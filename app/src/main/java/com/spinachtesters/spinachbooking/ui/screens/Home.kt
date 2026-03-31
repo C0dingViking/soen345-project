@@ -23,7 +23,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -33,15 +32,12 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
@@ -69,6 +65,7 @@ import com.spinachtesters.spinachbooking.ui.theme.*
 import com.spinachtesters.spinachbooking.ui.viewmodels.HomeViewModel
 import com.spinachtesters.spinachbooking.ui.components.FilterEventForm
 import com.spinachtesters.spinachbooking.ui.navigation.Screen
+import com.spinachtesters.spinachbooking.ui.viewmodels.FilterEventViewModel
 
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -76,10 +73,7 @@ import java.time.format.DateTimeFormatter
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.spinachtesters.spinachbooking.ui.navigation.Screen
-import com.spinachtesters.spinachbooking.ui.viewmodels.HomeViewModel
-import com.spinachtesters.spinachbooking.ui.viewmodels.SignUpViewModel
-import com.spinachtesters.spinachbooking.ui.viewmodels.FilterEventViewModel
+
 
 
 val sampleEvents = listOf(
@@ -455,6 +449,7 @@ fun HomeScreen(
                                 color = ButtonCancelRed,
                                 shape = RoundedCornerShape(25)
                             )
+                            .testTag("no_events_found_message")
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
@@ -463,7 +458,8 @@ fun HomeScreen(
                                 fontFamily = PoppinsFontFamily,
                                 fontSize = 16.sp,
                                 textAlign = TextAlign.Center,
-                                modifier = Modifier.padding(8.dp)
+                                modifier = Modifier
+                                    .padding(8.dp)
                             )
                         }
                     }

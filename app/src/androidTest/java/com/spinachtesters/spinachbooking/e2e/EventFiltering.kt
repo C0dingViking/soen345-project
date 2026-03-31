@@ -100,7 +100,7 @@ class EventFiltering {
             .performClick()
         composeRule.waitForIdle()
 
-        composeRule.waitUntil {
+        composeRule.waitUntil(timeoutMillis = 10_000) {
             composeRule
                 .onAllNodesWithTag("home_screen_scaffold")
                 .fetchSemanticsNodes().isNotEmpty()
@@ -128,5 +128,55 @@ class EventFiltering {
 
         composeRule.onNodeWithText("Gnomeo and Juliet")
             .assertIsDisplayed()
+    }
+
+    @Test
+    fun selectSport_asEventType_thenApplySearch_showsNoEventFoundMessage() {
+        composeRule.onNodeWithTag("login_toggle")
+            .performClick()
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithTag("login_identifier_input")
+            .performTextInput("willUsr")
+
+        composeRule.onNodeWithTag("login_password_input")
+            .performTextInput("Password123!")
+
+        composeRule.onNodeWithTag("login_submit_button")
+            .performClick()
+        composeRule.waitForIdle()
+
+        composeRule.waitUntil(timeoutMillis = 10_000) {
+
+            composeRule
+                .onAllNodesWithTag("home_screen_scaffold")
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+
+        composeRule.onNodeWithTag("home_screen_scaffold")
+            .assertIsDisplayed()
+
+        composeRule.onNodeWithTag("search_bar")
+            .performClick()
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithTag("search_form_lazy_column")
+            .assertIsDisplayed()
+
+        composeRule.onNodeWithTag("create_eventType_input")
+            .performClick()
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithTag("sports_eventType_input")
+            .performClick()
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithTag("search_button")
+            .performClick()
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithTag("no_events_found_message")
+            .assertIsDisplayed()
+
     }
 }
