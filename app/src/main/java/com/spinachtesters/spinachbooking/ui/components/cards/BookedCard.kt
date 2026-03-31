@@ -41,6 +41,7 @@ fun BookedCardPreview() {
 
 @Composable
 fun BookedCard(
+    modifier: Modifier = Modifier,
     title: String,
     location: String,
     date: String,
@@ -51,7 +52,7 @@ fun BookedCard(
 ) {
     Card(
         shape = RoundedCornerShape(12.dp),
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 6.dp)
             .clickable(onClick = onClick),

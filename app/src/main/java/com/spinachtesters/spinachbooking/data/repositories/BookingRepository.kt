@@ -26,4 +26,8 @@ class BookingRepository(
         val dtoList = source.getAll()
         return dtoList.map { dto -> dto.toDomain() }
     }
+
+    suspend fun deleteById(id: String) {
+        source.deleteById(id)
+    }
 }
