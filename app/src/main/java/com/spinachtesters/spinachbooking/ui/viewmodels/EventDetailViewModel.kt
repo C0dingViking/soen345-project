@@ -172,17 +172,28 @@ class EventDetailViewModel(
                     status = "ACTIVE"
                 )
                 bookingRepository.save(bookingId, booking)
-                enqueueNotificationSafely(
+
+                val notificationError = enqueueNotificationSafely(
                     userId = currentUserId,
                     event = event,
                     action = BOOKING_REGISTERED_ACTION
                 )
                 _uiState.update {
-                    it.copy(
-                        isBooked = true,
-                        dialogState = EventDetailDialogState.None,
-                        shouldNavigateHome = true
-                    )
+                    if (notificationError == null) {
+                        it.copy(
+                            isBooked = true,
+                            dialogState = EventDetailDialogState.None,
+                            shouldNavigateHome = true
+                        )
+                    } else {
+                        it.copy(
+                            isBooked = true,
+                            shouldNavigateHome = false,
+                            dialogState = EventDetailDialogState.Error(
+                                "Booking completed, but notification failed: $notificationError"
+                            )
+                        )
+                    }
                 }
             } catch (_: Exception) {
                 _uiState.update {
@@ -214,17 +225,29 @@ class EventDetailViewModel(
                     val updatedBooking = userBooking.copy(status = "CANCELLED")
                     val bookingId = generateBookingId(currentUserId, event.id)
                     bookingRepository.save(bookingId, updatedBooking)
-                    enqueueNotificationSafely(
+
+                    val notificationError = enqueueNotificationSafely(
                         userId = currentUserId,
                         event = event,
                         action = BOOKING_CANCELLED_ACTION
                     )
+
                     _uiState.update {
-                        it.copy(
-                            isBooked = false,
-                            dialogState = EventDetailDialogState.None,
-                            shouldNavigateHome = true
-                        )
+                        if (notificationError == null) {
+                            it.copy(
+                                isBooked = false,
+                                dialogState = EventDetailDialogState.None,
+                                shouldNavigateHome = true
+                            )
+                        } else {
+                            it.copy(
+                                isBooked = false,
+                                shouldNavigateHome = false,
+                                dialogState = EventDetailDialogState.Error(
+                                    "Cancellation completed, but notification failed: $notificationError"
+                                )
+                            )
+                        }
                     }
                 } else {
                     _uiState.update {
@@ -271,6 +294,8 @@ class EventDetailViewModel(
                 action = action
             )
             notificationStrategies.firstOrNull { it.canSend(request) }?.send(request)
+        }.exceptionOrNull()?.let { throwable ->
+            throwable.message ?: "Unknown notification error."
         }
     }
 
