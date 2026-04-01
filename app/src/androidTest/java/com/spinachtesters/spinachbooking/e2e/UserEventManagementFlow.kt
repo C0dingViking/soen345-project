@@ -83,7 +83,10 @@ class UserE2eActions(
         waitForRoute(Screen.Home.route)
     }
 
-    fun registerForEvent(eventTitle: String) {
+    fun registerForEvent(
+        eventTitle: String,
+        expectNotificationError: Boolean = false
+    ) {
         openEventDetailByTitle(eventTitle)
         waitForRoute(Screen.EventDetail.route)
 
@@ -92,14 +95,21 @@ class UserE2eActions(
         if (hasTextNode("Participate")) {
             composeRule.onNodeWithText("Participate").performClick()
             composeRule.onNodeWithText("Yes").performClick()
+            handlePostBookingFlow(
+                expectNotificationError = expectNotificationError,
+                errorPrefix = "Booking completed, but notification failed:"
+            )
         } else {
             composeRule.runOnIdle { navControllerProvider().popBackStack() }
+            waitForRoute(Screen.Home.route)
         }
-        waitForRoute(Screen.Home.route)
         refreshHome()
     }
 
-    fun deregisterFromEvent(eventTitle: String) {
+    fun deregisterFromEvent(
+        eventTitle: String,
+        expectNotificationError: Boolean = false
+    ) {
         openEventDetailByTitle(eventTitle)
         waitForRoute(Screen.EventDetail.route)
 
@@ -108,11 +118,30 @@ class UserE2eActions(
         if (hasTextNode("Cancel")) {
             composeRule.onNodeWithText("Cancel").performClick()
             composeRule.onNodeWithText("Yes").performClick()
+            handlePostBookingFlow(
+                expectNotificationError = expectNotificationError,
+                errorPrefix = "Cancellation completed, but notification failed:"
+            )
         } else {
             composeRule.runOnIdle { navControllerProvider().popBackStack() }
+            waitForRoute(Screen.Home.route)
         }
-        waitForRoute(Screen.Home.route)
         refreshHome()
+    }
+
+    private fun handlePostBookingFlow(expectNotificationError: Boolean, errorPrefix: String) {
+        if (expectNotificationError) {
+            composeRule.waitUntil(20_000) {
+                composeRule.onAllNodesWithText(errorPrefix, substring = true)
+                    .fetchSemanticsNodes().isNotEmpty()
+            }
+            composeRule.onNodeWithText(errorPrefix, substring = true).assertIsDisplayed()
+            composeRule.onNodeWithText("OK").performClick()
+            composeRule.runOnIdle { navControllerProvider().popBackStack() }
+            waitForRoute(Screen.Home.route)
+        } else {
+            waitForRoute(Screen.Home.route)
+        }
     }
 
     fun assertBookingExists(eventTitle: String) {
@@ -347,7 +376,7 @@ class UserEventManagementFlow {
         )
         userActions.loginUserAccount(username)
 
-        userActions.registerForEvent(eventTitle)
+        userActions.registerForEvent(eventTitle, expectNotificationError = true)
         userActions.assertBookingExists(eventTitle)
     }
 
@@ -369,10 +398,10 @@ class UserEventManagementFlow {
         )
         userActions.loginUserAccount(username)
 
-        userActions.registerForEvent(eventTitle)
+        userActions.registerForEvent(eventTitle, expectNotificationError = true)
         userActions.assertBookingExists(eventTitle)
 
-        userActions.deregisterFromEvent(eventTitle)
+        userActions.deregisterFromEvent(eventTitle, expectNotificationError = true)
         assertBookingRemoved(eventTitle)
     }
 
@@ -396,7 +425,7 @@ class UserEventManagementFlow {
         )
         userActions.loginUserAccount(username)
 
-        userActions.registerForEvent(firstEvent)
+        userActions.registerForEvent(firstEvent, expectNotificationError = true)
         userActions.assertBookingExists(firstEvent)
 
         userActions.assertConflictRejected(secondEvent)
@@ -443,7 +472,7 @@ class UserEventManagementFlow {
             fullName = "Persist User $stamp"
         )
         userActions.loginUserAccount(username)
-        userActions.registerForEvent(eventTitle)
+        userActions.registerForEvent(eventTitle, expectNotificationError = true)
         userActions.assertBookingExists(eventTitle)
 
         resetToSignUp()
