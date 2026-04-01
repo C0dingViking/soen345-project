@@ -284,18 +284,27 @@ class EventDetailViewModel(
         return "$userId-$eventId"
     }
 
-    private suspend fun enqueueNotificationSafely(userId: String, event: Event, action: String) {
-        val user = userRepository.getById(userId) ?: return
-        runCatching {
+    private suspend fun enqueueNotificationSafely(
+        userId: String,
+        event: Event,
+        action: String
+    ): String? {
+        val user = userRepository.getById(userId) ?: return "Could not find user."
+        return runCatching {
             val request = NotificationRequest(
                 phoneNumber = user.phoneNb,
                 email = user.email,
                 event = event,
                 action = action
             )
-            notificationStrategies.firstOrNull { it.canSend(request) }?.send(request)
-        }.exceptionOrNull()?.let { throwable ->
-            throwable.message ?: "Unknown notification error."
+            val strategy = notificationStrategies.firstOrNull { it.canSend(request) }
+            if (strategy == null) {
+                return@runCatching null
+            }
+            strategy.send(request)
+            null
+        }.getOrElse { throwable ->
+            throwable.message?.takeIf { it.isNotBlank() } ?: "Unknown notification error."
         }
     }
 

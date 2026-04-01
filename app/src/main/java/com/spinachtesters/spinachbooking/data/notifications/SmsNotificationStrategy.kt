@@ -28,8 +28,9 @@ class SmsNotificationStrategy(
         }
 
         withContext(Dispatchers.IO) {
+            val phone = "1" + request.phoneNumber;
             val payload = JSONObject()
-                .put("to", request.phoneNumber)
+                .put("to", phone)
                 .put("from", from)
                 .put("channel", "sms")
                 .put("message_type", "text")
