@@ -4,6 +4,7 @@ import com.spinachtesters.spinachbooking.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.Credentials
+import okhttp3.FormBody
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -29,7 +30,13 @@ object EventNotificationSender {
                 action
             )
 
-            email.isNotBlank() -> sendEmail(email, eventTitle, eventDate, eventTime, action)
+            email.isNotBlank() -> sendEmail(
+                email,
+                eventTitle,
+                eventDate,
+                eventTime,
+                action
+            )
         }
     }
 
@@ -76,14 +83,49 @@ object EventNotificationSender {
         }
     }
 
-    @Suppress("UNUSED_PARAMETER")
-    private fun sendEmail(
+    private suspend fun sendEmail(
         email: String,
         eventTitle: String,
         eventDate: String,
         eventTime: String,
         action: String
     ) {
+        val apiKey = BuildConfig.MAILGUN_API_KEY
+        val domain = BuildConfig.MAILGUN_DOMAIN
+        val from = BuildConfig.MAILGUN_FROM_EMAIL
+
+        if (apiKey.isBlank() || domain.isBlank() || from.isBlank()) {
+            return
+        }
+
+        withContext(Dispatchers.IO) {
+            val subject = when (action) {
+                ACTION_BOOKING_CANCELLED -> "Event booking canceled"
+                ACTION_BOOKING_REGISTERED -> "Event booking confirmed"
+                else -> "Event booking update"
+            }
+
+            val text = buildMessage(eventTitle, eventDate, eventTime, action)
+            val formBody = FormBody.Builder()
+                .add("from", from)
+                .add("to", email)
+                .add("subject", subject)
+                .add("text", text)
+                .build()
+
+            val request = Request.Builder()
+                .url("$MAILGUN_BASE_URL/$domain/messages")
+                .header("Authorization", Credentials.basic("api", apiKey))
+                .post(formBody)
+                .build()
+
+            httpClient.newCall(request).execute().use { response ->
+                val body = response.body?.string().orEmpty()
+                if (!response.isSuccessful) {
+                    throw IOException("Mailgun email request failed: code=${response.code}, body=$body")
+                }
+            }
+        }
     }
 
     private fun buildMessage(
@@ -111,6 +153,7 @@ object EventNotificationSender {
     const val ACTION_BOOKING_CANCELLED = "booking_cancelled"
 
     private const val VONAGE_MESSAGES_URL = "https://api.nexmo.com/v1/messages"
+    private const val MAILGUN_BASE_URL = "https://api.mailgun.net/v3"
     private val JSON_MEDIA_TYPE = "application/json; charset=utf-8".toMediaType()
     private val httpClient = OkHttpClient()
 }

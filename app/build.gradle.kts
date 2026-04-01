@@ -49,6 +49,9 @@ android {
         buildConfigField("String", "VONAGE_API_KEY", "\"${localValue("VONAGE_API_KEY")}\"")
         buildConfigField("String", "VONAGE_API_SECRET", "\"${localValue("VONAGE_API_SECRET")}\"")
         buildConfigField("String", "VONAGE_FROM", "\"${localValue("VONAGE_FROM")}\"")
+        buildConfigField("String", "MAILGUN_API_KEY", "\"${localValue("MAILGUN_API_KEY")}\"")
+        buildConfigField("String", "MAILGUN_DOMAIN", "\"${localValue("MAILGUN_DOMAIN")}\"")
+        buildConfigField("String", "MAILGUN_FROM_EMAIL", "\"${localValue("MAILGUN_FROM_EMAIL")}\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
