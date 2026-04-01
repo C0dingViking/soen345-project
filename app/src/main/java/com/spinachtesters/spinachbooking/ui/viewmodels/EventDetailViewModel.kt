@@ -2,19 +2,23 @@ package com.spinachtesters.spinachbooking.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.spinachtesters.spinachbooking.data.notifications.EventNotificationSender
+import com.spinachtesters.spinachbooking.data.notifications.EmailNotificationStrategy
+import com.spinachtesters.spinachbooking.data.notifications.NotificationActions
+import com.spinachtesters.spinachbooking.data.notifications.NotificationRequest
+import com.spinachtesters.spinachbooking.data.notifications.NotificationStrategy
+import com.spinachtesters.spinachbooking.data.notifications.SmsNotificationStrategy
 import com.spinachtesters.spinachbooking.data.repositories.BookingRepository
 import com.spinachtesters.spinachbooking.data.repositories.EventRepository
 import com.spinachtesters.spinachbooking.data.repositories.UserRepository
 import com.spinachtesters.spinachbooking.data.session.SessionManager
 import com.spinachtesters.spinachbooking.domain.models.Booking
 import com.spinachtesters.spinachbooking.domain.models.Event
-import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
 
 data class EventDetailUiState(
     val event: Event? = null,
@@ -41,6 +45,10 @@ class EventDetailViewModel(
 
     private val _uiState = MutableStateFlow(EventDetailUiState())
     val uiState: StateFlow<EventDetailUiState> = _uiState.asStateFlow()
+    private val notificationStrategies: List<NotificationStrategy> = listOf(
+        SmsNotificationStrategy(OkHttpClient()),
+        EmailNotificationStrategy(OkHttpClient())
+    )
 
     fun loadEvent(eventId: String?) {
         if (eventId.isNullOrBlank()) {
@@ -256,21 +264,18 @@ class EventDetailViewModel(
     private suspend fun enqueueNotificationSafely(userId: String, event: Event, action: String) {
         val user = userRepository.getById(userId) ?: return
         runCatching {
-            EventNotificationSender.sendBookingUpdate(
+            val request = NotificationRequest(
                 phoneNumber = user.phoneNb,
                 email = user.email,
-                eventTitle = event.title,
-                eventDate = event.date.format(EVENT_DATE_FORMATTER),
-                eventTime = event.startTime.format(EVENT_TIME_FORMATTER),
+                event = event,
                 action = action
             )
+            notificationStrategies.firstOrNull { it.canSend(request) }?.send(request)
         }
     }
 
     private companion object {
-        const val BOOKING_REGISTERED_ACTION = EventNotificationSender.ACTION_BOOKING_REGISTERED
-        const val BOOKING_CANCELLED_ACTION = EventNotificationSender.ACTION_BOOKING_CANCELLED
-        val EVENT_DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-        val EVENT_TIME_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+        const val BOOKING_REGISTERED_ACTION = NotificationActions.BOOKING_REGISTERED
+        const val BOOKING_CANCELLED_ACTION = NotificationActions.BOOKING_CANCELLED
     }
 }
