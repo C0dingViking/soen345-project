@@ -2,11 +2,14 @@ package com.spinachtesters.spinachbooking.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.spinachtesters.spinachbooking.data.notifications.EventNotificationSender
 import com.spinachtesters.spinachbooking.data.repositories.BookingRepository
 import com.spinachtesters.spinachbooking.data.repositories.EventRepository
+import com.spinachtesters.spinachbooking.data.repositories.UserRepository
 import com.spinachtesters.spinachbooking.data.session.SessionManager
 import com.spinachtesters.spinachbooking.domain.models.Booking
 import com.spinachtesters.spinachbooking.domain.models.Event
+import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,6 +35,7 @@ sealed class EventDetailDialogState {
 class EventDetailViewModel(
     private val eventRepository: EventRepository = EventRepository(),
     private val bookingRepository: BookingRepository = BookingRepository(),
+    private val userRepository: UserRepository = UserRepository(),
     private val sessionManager: SessionManager = SessionManager
 ) : ViewModel() {
 
@@ -160,6 +164,11 @@ class EventDetailViewModel(
                     status = "ACTIVE"
                 )
                 bookingRepository.save(bookingId, booking)
+                enqueueNotificationSafely(
+                    userId = currentUserId,
+                    event = event,
+                    action = BOOKING_REGISTERED_ACTION
+                )
                 _uiState.update {
                     it.copy(
                         isBooked = true,
@@ -197,6 +206,11 @@ class EventDetailViewModel(
                     val updatedBooking = userBooking.copy(status = "CANCELLED")
                     val bookingId = generateBookingId(currentUserId, event.id)
                     bookingRepository.save(bookingId, updatedBooking)
+                    enqueueNotificationSafely(
+                        userId = currentUserId,
+                        event = event,
+                        action = BOOKING_CANCELLED_ACTION
+                    )
                     _uiState.update {
                         it.copy(
                             isBooked = false,
@@ -237,5 +251,26 @@ class EventDetailViewModel(
 
     private fun generateBookingId(userId: String, eventId: String): String {
         return "$userId-$eventId"
+    }
+
+    private suspend fun enqueueNotificationSafely(userId: String, event: Event, action: String) {
+        val user = userRepository.getById(userId) ?: return
+        runCatching {
+            EventNotificationSender.sendBookingUpdate(
+                phoneNumber = user.phoneNb,
+                email = user.email,
+                eventTitle = event.title,
+                eventDate = event.date.format(EVENT_DATE_FORMATTER),
+                eventTime = event.startTime.format(EVENT_TIME_FORMATTER),
+                action = action
+            )
+        }
+    }
+
+    private companion object {
+        const val BOOKING_REGISTERED_ACTION = EventNotificationSender.ACTION_BOOKING_REGISTERED
+        const val BOOKING_CANCELLED_ACTION = EventNotificationSender.ACTION_BOOKING_CANCELLED
+        val EVENT_DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+        val EVENT_TIME_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
     }
 }
