@@ -2,6 +2,7 @@ package com.spinachtesters.spinachbooking.ui.viewmodels
 
 import com.spinachtesters.spinachbooking.data.repositories.BookingRepository
 import com.spinachtesters.spinachbooking.data.repositories.EventRepository
+import com.spinachtesters.spinachbooking.data.repositories.UserRepository
 import com.spinachtesters.spinachbooking.data.session.SessionManager
 import com.spinachtesters.spinachbooking.domain.models.Event
 import com.spinachtesters.spinachbooking.domain.models.SportDetails
@@ -30,6 +31,7 @@ class EventDetailViewModelTest {
 
     private val eventRepository: EventRepository = mockk()
     private val bookingRepository: BookingRepository = mockk()
+    private val userRepository: UserRepository = mockk()
 
     @BeforeEach
     fun setup() {
@@ -55,6 +57,7 @@ class EventDetailViewModelTest {
         val viewModel = EventDetailViewModel(
             eventRepository = eventRepository,
             bookingRepository = bookingRepository,
+            userRepository = userRepository,
             sessionManager = SessionManager
         )
         viewModel.loadEvent("e1")
@@ -71,6 +74,7 @@ class EventDetailViewModelTest {
         val viewModel = EventDetailViewModel(
             eventRepository = eventRepository,
             bookingRepository = bookingRepository,
+            userRepository = userRepository,
             sessionManager = SessionManager
         )
         viewModel.loadEvent(null)
@@ -87,6 +91,7 @@ class EventDetailViewModelTest {
         val viewModel = EventDetailViewModel(
             eventRepository = eventRepository,
             bookingRepository = bookingRepository,
+            userRepository = userRepository,
             sessionManager = SessionManager
         )
         viewModel.loadEvent("e1")
