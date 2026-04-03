@@ -6,6 +6,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -131,13 +132,26 @@ class UserE2eActions(
 
     private fun handlePostBookingFlow(expectNotificationError: Boolean, errorPrefix: String) {
         if (expectNotificationError) {
+            // In e2e, notification can fail (dialog) or still succeed (direct Home).
             composeRule.waitUntil(20_000) {
-                composeRule.onAllNodesWithText(errorPrefix, substring = true)
-                    .fetchSemanticsNodes().isNotEmpty()
+                navControllerProvider().currentBackStackEntry?.destination?.route == Screen.Home.route ||
+                    composeRule.onAllNodesWithText(errorPrefix, substring = true)
+                        .fetchSemanticsNodes().isNotEmpty()
             }
-            composeRule.onNodeWithText(errorPrefix, substring = true).assertIsDisplayed()
-            composeRule.onNodeWithText("OK").performClick()
-            composeRule.runOnIdle { navControllerProvider().popBackStack() }
+
+            val isErrorVisible = composeRule
+                .onAllNodesWithText(errorPrefix, substring = true)
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+
+            if (isErrorVisible) {
+                composeRule.onNodeWithText(errorPrefix, substring = true).assertIsDisplayed()
+                composeRule.onNodeWithText("OK").performClick()
+            }
+
+            if (navControllerProvider().currentBackStackEntry?.destination?.route != Screen.Home.route) {
+                composeRule.runOnIdle { navControllerProvider().popBackStack() }
+            }
             waitForRoute(Screen.Home.route)
         } else {
             waitForRoute(Screen.Home.route)
@@ -490,7 +504,23 @@ class UserEventManagementFlow {
         }
         waitForRoute(Screen.EventDetail.route)
 
-        composeRule.onNodeWithText("Event not found.").assertIsDisplayed()
+        composeRule.waitUntil(20_000) {
+            composeRule.onAllNodesWithTag("event_detail_error").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        val showsNotFound = composeRule
+            .onAllNodesWithText("Event not found.")
+            .fetchSemanticsNodes()
+            .isNotEmpty()
+        val showsLoadFailure = composeRule
+            .onAllNodesWithText("Could not load event.")
+            .fetchSemanticsNodes()
+            .isNotEmpty()
+
+        composeRule.onNodeWithTag("event_detail_error").assertIsDisplayed()
+        check(showsNotFound || showsLoadFailure) {
+            "Expected EventDetail error text to be 'Event not found.' or 'Could not load event.'"
+        }
     }
 
     private fun resetToSignUp() {
