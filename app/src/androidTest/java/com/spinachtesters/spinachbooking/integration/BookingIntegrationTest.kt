@@ -97,7 +97,7 @@ class BookingIntegrationTest {
     fun loadEvent_showsNotBookedInitially() = runBlocking {
         val event = createEvent("notbooked", 18, 20)
 
-        val vm = EventDetailViewModel(eventRepository, bookingRepository, SessionManager)
+        val vm = EventDetailViewModel(eventRepository, bookingRepository, userRepository, SessionManager)
         vm.loadEvent(event.id)
         waitUntil("event loaded") {
             vm.uiState.value.event != null || vm.uiState.value.errorMessage != null
@@ -114,7 +114,7 @@ class BookingIntegrationTest {
         val bookingId = "$userId-${event.id}"
         createdBookingIds.add(bookingId)
 
-        val vm = EventDetailViewModel(eventRepository, bookingRepository, SessionManager)
+        val vm = EventDetailViewModel(eventRepository, bookingRepository, userRepository, SessionManager)
         vm.loadEvent(event.id)
         waitUntil("event loaded") { vm.uiState.value.event != null }
 
@@ -143,7 +143,7 @@ class BookingIntegrationTest {
         val bookingId = "$userId-${event.id}"
         createdBookingIds.add(bookingId)
 
-        val vm = EventDetailViewModel(eventRepository, bookingRepository, SessionManager)
+        val vm = EventDetailViewModel(eventRepository, bookingRepository, userRepository, SessionManager)
         vm.loadEvent(event.id)
         waitUntil("event loaded") { vm.uiState.value.event != null }
 
@@ -155,7 +155,7 @@ class BookingIntegrationTest {
         waitUntil("booking confirmed") { vm.uiState.value.isBooked }
 
         // Reload to get fresh state
-        val vm2 = EventDetailViewModel(eventRepository, bookingRepository, SessionManager)
+        val vm2 = EventDetailViewModel(eventRepository, bookingRepository, userRepository, SessionManager)
         vm2.loadEvent(event.id)
         waitUntil("event reloaded") { vm2.uiState.value.event != null }
         assertTrue(vm2.uiState.value.isBooked)
@@ -183,7 +183,7 @@ class BookingIntegrationTest {
         val event2 = createEvent("conflict2", 19, 21)
 
         // Book the first event
-        val vm1 = EventDetailViewModel(eventRepository, bookingRepository, SessionManager)
+        val vm1 = EventDetailViewModel(eventRepository, bookingRepository, userRepository, SessionManager)
         vm1.loadEvent(event1.id)
         waitUntil("event1 loaded") { vm1.uiState.value.event != null }
         vm1.participateInEvent()
@@ -194,7 +194,7 @@ class BookingIntegrationTest {
         waitUntil("booking1 confirmed") { vm1.uiState.value.isBooked }
 
         // Try to book the overlapping event
-        val vm2 = EventDetailViewModel(eventRepository, bookingRepository, SessionManager)
+        val vm2 = EventDetailViewModel(eventRepository, bookingRepository, userRepository, SessionManager)
         vm2.loadEvent(event2.id)
         waitUntil("event2 loaded") { vm2.uiState.value.event != null }
         vm2.participateInEvent()
@@ -220,7 +220,7 @@ class BookingIntegrationTest {
         createdBookingIds.add(bookingId2)
 
         // Book the first event
-        val vm1 = EventDetailViewModel(eventRepository, bookingRepository, SessionManager)
+        val vm1 = EventDetailViewModel(eventRepository, bookingRepository, userRepository, SessionManager)
         vm1.loadEvent(event1.id)
         waitUntil("event1 loaded") { vm1.uiState.value.event != null }
         vm1.participateInEvent()
@@ -231,7 +231,7 @@ class BookingIntegrationTest {
         waitUntil("booking1 confirmed") { vm1.uiState.value.isBooked }
 
         // Book the non-overlapping event
-        val vm2 = EventDetailViewModel(eventRepository, bookingRepository, SessionManager)
+        val vm2 = EventDetailViewModel(eventRepository, bookingRepository, userRepository, SessionManager)
         vm2.loadEvent(event2.id)
         waitUntil("event2 loaded") { vm2.uiState.value.event != null }
         vm2.participateInEvent()
@@ -249,7 +249,7 @@ class BookingIntegrationTest {
         val bookingId = "$userId-${event.id}"
         createdBookingIds.add(bookingId)
 
-        val vm = EventDetailViewModel(eventRepository, bookingRepository, SessionManager)
+        val vm = EventDetailViewModel(eventRepository, bookingRepository, userRepository, SessionManager)
         vm.loadEvent(event.id)
         waitUntil("event loaded") { vm.uiState.value.event != null }
         vm.participateInEvent()
@@ -260,7 +260,7 @@ class BookingIntegrationTest {
         waitUntil("booking confirmed") { vm.uiState.value.isBooked }
 
         // Load with fresh ViewModel — should detect existing booking
-        val vm2 = EventDetailViewModel(eventRepository, bookingRepository, SessionManager)
+        val vm2 = EventDetailViewModel(eventRepository, bookingRepository, userRepository, SessionManager)
         vm2.loadEvent(event.id)
         waitUntil("event reloaded") {
             vm2.uiState.value.event != null && !vm2.uiState.value.isLoading
