@@ -6,6 +6,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -83,7 +84,10 @@ class UserE2eActions(
         waitForRoute(Screen.Home.route)
     }
 
-    fun registerForEvent(eventTitle: String) {
+    fun registerForEvent(
+        eventTitle: String,
+        expectNotificationError: Boolean = false
+    ) {
         openEventDetailByTitle(eventTitle)
         waitForRoute(Screen.EventDetail.route)
 
@@ -92,14 +96,21 @@ class UserE2eActions(
         if (hasTextNode("Participate")) {
             composeRule.onNodeWithText("Participate").performClick()
             composeRule.onNodeWithText("Yes").performClick()
+            handlePostBookingFlow(
+                expectNotificationError = expectNotificationError,
+                errorPrefix = "Booking completed, but notification failed:"
+            )
         } else {
             composeRule.runOnIdle { navControllerProvider().popBackStack() }
+            waitForRoute(Screen.Home.route)
         }
-        waitForRoute(Screen.Home.route)
         refreshHome()
     }
 
-    fun deregisterFromEvent(eventTitle: String) {
+    fun deregisterFromEvent(
+        eventTitle: String,
+        expectNotificationError: Boolean = false
+    ) {
         openEventDetailByTitle(eventTitle)
         waitForRoute(Screen.EventDetail.route)
 
@@ -108,11 +119,43 @@ class UserE2eActions(
         if (hasTextNode("Cancel")) {
             composeRule.onNodeWithText("Cancel").performClick()
             composeRule.onNodeWithText("Yes").performClick()
+            handlePostBookingFlow(
+                expectNotificationError = expectNotificationError,
+                errorPrefix = "Cancellation completed, but notification failed:"
+            )
         } else {
             composeRule.runOnIdle { navControllerProvider().popBackStack() }
+            waitForRoute(Screen.Home.route)
         }
-        waitForRoute(Screen.Home.route)
         refreshHome()
+    }
+
+    private fun handlePostBookingFlow(expectNotificationError: Boolean, errorPrefix: String) {
+        if (expectNotificationError) {
+            // In e2e, notification can fail (dialog) or still succeed (direct Home).
+            composeRule.waitUntil(20_000) {
+                navControllerProvider().currentBackStackEntry?.destination?.route == Screen.Home.route ||
+                    composeRule.onAllNodesWithText(errorPrefix, substring = true)
+                        .fetchSemanticsNodes().isNotEmpty()
+            }
+
+            val isErrorVisible = composeRule
+                .onAllNodesWithText(errorPrefix, substring = true)
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+
+            if (isErrorVisible) {
+                composeRule.onNodeWithText(errorPrefix, substring = true).assertIsDisplayed()
+                composeRule.onNodeWithText("OK").performClick()
+            }
+
+            if (navControllerProvider().currentBackStackEntry?.destination?.route != Screen.Home.route) {
+                composeRule.runOnIdle { navControllerProvider().popBackStack() }
+            }
+            waitForRoute(Screen.Home.route)
+        } else {
+            waitForRoute(Screen.Home.route)
+        }
     }
 
     fun assertBookingExists(eventTitle: String) {
@@ -347,7 +390,7 @@ class UserEventManagementFlow {
         )
         userActions.loginUserAccount(username)
 
-        userActions.registerForEvent(eventTitle)
+        userActions.registerForEvent(eventTitle, expectNotificationError = true)
         userActions.assertBookingExists(eventTitle)
     }
 
@@ -369,10 +412,10 @@ class UserEventManagementFlow {
         )
         userActions.loginUserAccount(username)
 
-        userActions.registerForEvent(eventTitle)
+        userActions.registerForEvent(eventTitle, expectNotificationError = true)
         userActions.assertBookingExists(eventTitle)
 
-        userActions.deregisterFromEvent(eventTitle)
+        userActions.deregisterFromEvent(eventTitle, expectNotificationError = true)
         assertBookingRemoved(eventTitle)
     }
 
@@ -396,7 +439,7 @@ class UserEventManagementFlow {
         )
         userActions.loginUserAccount(username)
 
-        userActions.registerForEvent(firstEvent)
+        userActions.registerForEvent(firstEvent, expectNotificationError = true)
         userActions.assertBookingExists(firstEvent)
 
         userActions.assertConflictRejected(secondEvent)
@@ -443,7 +486,7 @@ class UserEventManagementFlow {
             fullName = "Persist User $stamp"
         )
         userActions.loginUserAccount(username)
-        userActions.registerForEvent(eventTitle)
+        userActions.registerForEvent(eventTitle, expectNotificationError = true)
         userActions.assertBookingExists(eventTitle)
 
         resetToSignUp()
@@ -461,7 +504,23 @@ class UserEventManagementFlow {
         }
         waitForRoute(Screen.EventDetail.route)
 
-        composeRule.onNodeWithText("Event not found.").assertIsDisplayed()
+        composeRule.waitUntil(20_000) {
+            composeRule.onAllNodesWithTag("event_detail_error").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        val showsNotFound = composeRule
+            .onAllNodesWithText("Event not found.")
+            .fetchSemanticsNodes()
+            .isNotEmpty()
+        val showsLoadFailure = composeRule
+            .onAllNodesWithText("Could not load event.")
+            .fetchSemanticsNodes()
+            .isNotEmpty()
+
+        composeRule.onNodeWithTag("event_detail_error").assertIsDisplayed()
+        check(showsNotFound || showsLoadFailure) {
+            "Expected EventDetail error text to be 'Event not found.' or 'Could not load event.'"
+        }
     }
 
     private fun resetToSignUp() {

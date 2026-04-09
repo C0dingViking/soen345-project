@@ -25,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -37,7 +38,6 @@ import com.spinachtesters.spinachbooking.domain.models.FilmDetails
 import com.spinachtesters.spinachbooking.domain.models.SportDetails
 import com.spinachtesters.spinachbooking.domain.models.TheaterDetails
 import com.spinachtesters.spinachbooking.ui.components.MinimalTopBar
-import com.spinachtesters.spinachbooking.ui.navigation.Screen
 import com.spinachtesters.spinachbooking.ui.theme.Background
 import com.spinachtesters.spinachbooking.ui.theme.ButtonYellow
 import com.spinachtesters.spinachbooking.ui.theme.PoppinsFontFamily
@@ -96,7 +96,10 @@ fun EventDetailScreen(
                         .padding(innerPadding),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = uiState.errorMessage!!)
+                    Text(
+                        text = uiState.errorMessage!!,
+                        modifier = Modifier.testTag("event_detail_error")
+                    )
                 }
             }
 
@@ -248,7 +251,11 @@ fun EventDetailScreen(
                         .padding(innerPadding),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "Event not found.", color = TextGreen)
+                    Text(
+                        text = "Event not found.",
+                        color = TextGreen,
+                        modifier = Modifier.testTag("event_detail_not_found")
+                    )
                 }
             }
         }

@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.plugin.kotlinToolingVersion
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
@@ -34,6 +35,24 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+        val localProperties = Properties().apply {
+            val localFile = rootProject.file("local.properties")
+            if (localFile.exists()) {
+                localFile.inputStream().use { load(it) }
+            }
+        }
+
+        fun localValue(name: String): String {
+            return localProperties.getProperty(name, "")
+        }
+
+        buildConfigField("String", "VONAGE_API_KEY", "\"${localValue("VONAGE_API_KEY")}\"")
+        buildConfigField("String", "VONAGE_API_SECRET", "\"${localValue("VONAGE_API_SECRET")}\"")
+        buildConfigField("String", "VONAGE_FROM", "\"${localValue("VONAGE_FROM")}\"")
+        buildConfigField("String", "MAILGUN_API_KEY", "\"${localValue("MAILGUN_API_KEY")}\"")
+        buildConfigField("String", "MAILGUN_DOMAIN", "\"${localValue("MAILGUN_DOMAIN")}\"")
+        buildConfigField("String", "MAILGUN_FROM_EMAIL", "\"${localValue("MAILGUN_FROM_EMAIL")}\"")
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -56,6 +75,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     lint {
         disable += "WrongStartDestinationType"
@@ -91,6 +111,7 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     implementation(platform("com.google.firebase:firebase-bom:34.10.0"))
     implementation("com.google.firebase:firebase-database")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
     testImplementation("io.mockk:mockk:1.14.9")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
     androidTestImplementation("io.mockk:mockk-android:1.14.9")
