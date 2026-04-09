@@ -155,7 +155,7 @@ class HomeViewModel(
                                 details.runtimeMin in (filter.filmRuntime - 5)..(filter.filmRuntime + 5)) &&
                         (filter.filmRating == null ||
                                 details.rating == filter.filmRating) &&
-                        (filter.filmGenre.isNotBlank() ||
+                        (filter.filmGenre.isBlank() ||
                                 details.genre.contains(filter.filmGenre, ignoreCase = true))
             }
             "concert" -> {

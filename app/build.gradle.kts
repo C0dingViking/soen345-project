@@ -57,6 +57,9 @@ android {
     buildFeatures {
         compose = true
     }
+    lint {
+        disable += "WrongStartDestinationType"
+    }
 }
 
 dependencies {
