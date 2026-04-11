@@ -472,7 +472,14 @@ class OrganizerEventManagementFlow {
 
     private fun assertEventVisible(title: String) {
         composeRule.waitUntil(20_000) {
-            composeRule.onAllNodesWithText(title).fetchSemanticsNodes().isNotEmpty()
+            val scrolledToItem = runCatching {
+                composeRule.onNodeWithTag("manage_events_list")
+                    .performScrollToNode(hasText(title))
+                true
+            }.getOrElse { false }
+
+            scrolledToItem && composeRule.onAllNodesWithText(title).fetchSemanticsNodes()
+                .isNotEmpty()
         }
     }
 
