@@ -4,6 +4,8 @@ import androidx.activity.ComponentActivity
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -12,6 +14,7 @@ import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.testing.TestNavHostController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -38,7 +41,10 @@ class SignUpScreenTest {
     @Test
     fun appLaunchesOnSignUpScreen() {
         composeRule.runOnIdle {
-            assertEquals(Screen.SignUp.route, navController.currentBackStackEntry?.destination?.route)
+            assertEquals(
+                Screen.SignUp.route,
+                navController.currentBackStackEntry?.destination?.route
+            )
         }
 
         composeRule.onNodeWithText("Have an account? Login").assertIsDisplayed()
@@ -50,7 +56,10 @@ class SignUpScreenTest {
         composeRule.onNodeWithText("No Account? Register").performClick()
 
         composeRule.runOnIdle {
-            assertEquals(Screen.SignUp.route, navController.currentBackStackEntry?.destination?.route)
+            assertEquals(
+                Screen.SignUp.route,
+                navController.currentBackStackEntry?.destination?.route
+            )
         }
     }
 
@@ -67,11 +76,13 @@ class SignUpScreenTest {
         composeRule.onNodeWithTag("signup_fullname_input").performTextInput("Jane Doe")
         composeRule.onNodeWithTag("signup_username_input").performTextInput("jan")
         composeRule.onNodeWithTag("signup_password_input").performTextInput("StrongPass123!")
-        composeRule.onNodeWithTag("signup_confirm_password_input").performTextInput("StrongPass123!")
+        composeRule.onNodeWithTag("signup_confirm_password_input")
+            .performTextInput("StrongPass123!")
 
         clickSignUpButton()
 
-        composeRule.onNodeWithText("Username must be at least 4 characters long.").assertIsDisplayed()
+        composeRule.onNodeWithText("Username must be at least 4 characters long.")
+            .assertIsDisplayed()
     }
 
     @Test
@@ -80,7 +91,8 @@ class SignUpScreenTest {
         composeRule.onNodeWithTag("signup_fullname_input").performTextInput("Jane Doe")
         composeRule.onNodeWithTag("signup_username_input").performTextInput("janedoe")
         composeRule.onNodeWithTag("signup_password_input").performTextInput("StrongPass123!")
-        composeRule.onNodeWithTag("signup_confirm_password_input").performTextInput("StrongPass123!")
+        composeRule.onNodeWithTag("signup_confirm_password_input")
+            .performTextInput("StrongPass123!")
 
         clickSignUpButton()
 
@@ -94,7 +106,8 @@ class SignUpScreenTest {
         composeRule.onNodeWithTag("signup_fullname_input").performTextInput("Jane Doe")
         composeRule.onNodeWithTag("signup_username_input").performTextInput("janedoe")
         composeRule.onNodeWithTag("signup_password_input").performTextInput("StrongPass123!")
-        composeRule.onNodeWithTag("signup_confirm_password_input").performTextInput("StrongPass123!")
+        composeRule.onNodeWithTag("signup_confirm_password_input")
+            .performTextInput("StrongPass123!")
 
         clickSignUpButton()
 
@@ -107,7 +120,8 @@ class SignUpScreenTest {
         composeRule.onNodeWithTag("signup_fullname_input").performTextInput("Jane Doe")
         composeRule.onNodeWithTag("signup_username_input").performTextInput("janedoe")
         composeRule.onNodeWithTag("signup_password_input").performTextInput("StrongPass123!")
-        composeRule.onNodeWithTag("signup_confirm_password_input").performTextInput("DifferentPass123!")
+        composeRule.onNodeWithTag("signup_confirm_password_input")
+            .performTextInput("DifferentPass123!")
 
         clickSignUpButton()
 
@@ -124,7 +138,43 @@ class SignUpScreenTest {
 
         clickSignUpButton()
 
-        composeRule.onNodeWithText("Password must be at least 12 characters long.").assertIsDisplayed()
+        composeRule.onNodeWithText("Password must be at least 12 characters long.")
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun signUp_contactMode_canTogglePhoneThenBackToEmail() {
+        composeRule.onNodeWithText("phone").performClick()
+        composeRule.onNodeWithText("Phone Number").assertIsDisplayed()
+
+        composeRule.onNodeWithText("email").performClick()
+        composeRule.onNodeWithText("Email").assertIsDisplayed()
+    }
+
+    @Test
+    fun signUp_passwordVisibilityToggle_togglesPasswordFieldIconState() {
+        composeRule.onAllNodesWithContentDescription("Show password")[0].performClick()
+        composeRule.onNodeWithContentDescription("Hide password").assertIsDisplayed()
+
+        composeRule.onNodeWithContentDescription("Hide password").performClick()
+
+        assertTrue(
+            composeRule.onAllNodesWithContentDescription("Hide password").fetchSemanticsNodes()
+                .isEmpty()
+        )
+    }
+
+    @Test
+    fun signUp_confirmPasswordVisibilityToggle_togglesConfirmFieldIconState() {
+        composeRule.onAllNodesWithContentDescription("Show password")[1].performClick()
+        composeRule.onNodeWithContentDescription("Hide password").assertIsDisplayed()
+
+        composeRule.onNodeWithContentDescription("Hide password").performClick()
+
+        assertTrue(
+            composeRule.onAllNodesWithContentDescription("Hide password").fetchSemanticsNodes()
+                .isEmpty()
+        )
     }
 
     private fun clickSignUpButton() {

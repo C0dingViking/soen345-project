@@ -84,7 +84,7 @@ fun FilterEventForm(
         item {
             Box(
                 modifier = Modifier.fillMaxWidth(0.9f)
-            ){
+            ) {
                 DateSelector(
                     "Event Date",
                     "search_date",
@@ -167,7 +167,7 @@ fun FilterEventForm(
                         DropdownMenuItem(
                             text = { Text(option, color = TextGreen) },
                             onClick = {
-                                viewModel.onEventTypeChanged(option);
+                                viewModel.onEventTypeChanged(option)
                                 expanded = false
                             },
                             modifier = Modifier
@@ -208,6 +208,7 @@ fun FilterEventForm(
                         )
                     }
                 }
+
                 "Sports" -> {
                     item {
                         MakeGenericTextfield(
@@ -242,6 +243,7 @@ fun FilterEventForm(
                         )
                     }
                 }
+
                 "Film" -> {
                     item {
                         MakeGenericTextfield(
@@ -278,6 +280,7 @@ fun FilterEventForm(
                         )
                     }
                 }
+
                 "Concert" -> {
                     item {
                         MakeGenericTextfield(
@@ -305,7 +308,8 @@ fun FilterEventForm(
             ) {
                 Checkbox(
                     checked = uiState.isOpenOnly,
-                    onCheckedChange = viewModel::onIsOnlyOpenChanged
+                    onCheckedChange = viewModel::onIsOnlyOpenChanged,
+                    modifier = Modifier.testTag("open_only_checkbox")
                 )
                 Text("Only show open events")
             }

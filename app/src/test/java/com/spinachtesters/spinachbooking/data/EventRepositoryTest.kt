@@ -97,7 +97,7 @@ class EventRepositoryTest {
     fun getByIdReturnsBooking() = runTest {
         coEvery { fakeEventSrc.getById("testevent123") } returns testEventDTO
         coEvery { fakeDetailsSrc.getById("testdetails123") } returns testEventDetailsDTO
-        coEvery { fakeFilmSrc.getById("testdetails123")} returns testFilmDetails
+        coEvery { fakeFilmSrc.getById("testdetails123") } returns testFilmDetails
 
         val result = repo.getById("testevent123")
 
@@ -155,9 +155,29 @@ class EventRepositoryTest {
     }
 
     @Test
+    @DisplayName("getById returns null when generic detail type is unknown")
+    fun getByIdReturnsNullForUnknownDetailType() = runTest {
+        val unknownEventDetailsDTO = testEventDetailsDTO.copy(detailType = "mystery")
+
+        coEvery { fakeEventSrc.getById("testevent123") } returns testEventDTO
+        coEvery { fakeDetailsSrc.getById("testdetails123") } returns unknownEventDetailsDTO
+
+        val result = repo.getById("testevent123")
+
+        assertNull(result)
+        coVerify(exactly = 0) { fakeFilmSrc.getById(any()) }
+        coVerify(exactly = 0) { fakeSportSrc.getById(any()) }
+        coVerify(exactly = 0) { fakeTheaterSrc.getById(any()) }
+        coVerify(exactly = 0) { fakeConcertSrc.getById(any()) }
+    }
+
+    @Test
     @DisplayName("getAll returns mapped list of full Events with details")
     fun getAllReturnsEvents() = runTest {
-        coEvery { fakeEventSrc.getAll() } returns listOf(testEventDTO, testEventDTO.copy(id = "copy"))
+        coEvery { fakeEventSrc.getAll() } returns listOf(
+            testEventDTO,
+            testEventDTO.copy(id = "copy")
+        )
         coEvery { fakeDetailsSrc.getById("testdetails123") } returns testEventDetailsDTO
         coEvery { fakeDetailsSrc.getById("copy") } returns testEventDetailsDTO.copy(id = "copy")
         coEvery { fakeFilmSrc.getById("testdetails123") } returns testFilmDetails
@@ -236,4 +256,26 @@ class EventRepositoryTest {
         coVerify(exactly = 0) { fakeConcertSrc.deleteById(any()) }
         coVerify(exactly = 0) { fakeDetailsSrc.deleteById(any()) }
     }
+
+    @Test
+    @DisplayName("deleteConcreteDetailsByType dispatches each known type and returns for unknown")
+    fun deleteConcreteDetailsByTypeDispatchesAllKnownAndUnknown() = runTest {
+        coEvery { fakeSportSrc.deleteById("s1") } just Runs
+        coEvery { fakeFilmSrc.deleteById("f1") } just Runs
+        coEvery { fakeTheaterSrc.deleteById("t1") } just Runs
+        coEvery { fakeConcertSrc.deleteById("c1") } just Runs
+
+        repo.deleteConcreteDetailsByType("s1", "sport")
+        repo.deleteConcreteDetailsByType("f1", "film")
+        repo.deleteConcreteDetailsByType("t1", "theater")
+        repo.deleteConcreteDetailsByType("c1", "concert")
+        repo.deleteConcreteDetailsByType("x1", "unknown")
+
+        coVerify(exactly = 1) { fakeSportSrc.deleteById("s1") }
+        coVerify(exactly = 1) { fakeFilmSrc.deleteById("f1") }
+        coVerify(exactly = 1) { fakeTheaterSrc.deleteById("t1") }
+        coVerify(exactly = 1) { fakeConcertSrc.deleteById("c1") }
+        coVerify(exactly = 0) { fakeDetailsSrc.deleteById(any()) }
+    }
+
 }
