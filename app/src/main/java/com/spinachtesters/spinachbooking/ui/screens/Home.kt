@@ -240,8 +240,8 @@ fun HomeScreen(
                                 if (!filterEventViewModel.uiState.value.isError) {
                                     filterEventViewModel.reset()
                                     onDismiss()
+                                    viewModel.filterEvents(filter)
                                 }
-                                viewModel.filterEvents(filter)
                             },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = ButtonYellow
@@ -453,7 +453,7 @@ fun HomeScreen(
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = "No events with the desired attributes were found....\n\nPlease try different attributes.",
+                                text = "No events with the desired attributes were found...\n\nPlease try different attributes.",
                                 color = ButtonCancelRed,
                                 fontFamily = PoppinsFontFamily,
                                 fontSize = 16.sp,
