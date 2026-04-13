@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     id("com.google.gms.google-services")
+    //id("org.jetbrains.kotlin.android") version "2.3.10" apply false
     jacoco
 }
 
@@ -76,6 +77,9 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+    lint {
+        disable += "WrongStartDestinationType"
     }
 }
 

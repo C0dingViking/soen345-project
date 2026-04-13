@@ -157,6 +157,10 @@ class HomeViewModelTest {
         viewModel.loadHomeData()
         advanceUntilIdle()
 
+        if (filter.eventType == "film") {
+            print("") // for break point
+        }
+
         viewModel.filterEvents(filter)
         advanceUntilIdle()
 
@@ -182,14 +186,36 @@ class HomeViewModelTest {
                 Arguments.of(EventFilter(startTime = LocalTime.of(18,0).toString()), selectEvents(events, 4)),
                 Arguments.of(EventFilter(endTime = LocalTime.of(23,0).toString()), selectEvents(events,6)),
                 Arguments.of(EventFilter(startTime = LocalTime.of(18, 25).toString(), endTime = LocalTime.of(20, 35).toString()), selectEvents(events, 1)),
-                Arguments.of(EventFilter(location = "Cinema"), selectEvents(events,2,3)),
-                Arguments.of(EventFilter(location = "Theater", isOpenOnly = false), selectEvents(events,4,5)),
-                Arguments.of(EventFilter(eventType = "Sport"), selectEvents(events, 0,1)),
-                Arguments.of(EventFilter(eventType = "Concert", isOpenOnly = false), selectEvents(events, 6,7)),
-                Arguments.of(EventFilter(eventType = "Theater", theaterWriter = "Shake", theaterGenre = "Tragedy", theaterDuration = 150), selectEvents(events, 4)),
-                Arguments.of(EventFilter(eventType = "Sport", sportType = "Basketball", sportHomeTeam = "C", sportVisitingTeam = "D", sportLeague = "NBA"), selectEvents(events, 1)),
-                Arguments.of(EventFilter(eventType = "Film", filmDirector = "Nolan", filmRuntime = 145, filmRating = 5, filmGenre = "sci-fi"), selectEvents(events, 3)),
-                Arguments.of(EventFilter(eventType = "Concert", concertMainArtist = "Rock band", concertGenre = "rock"), selectEvents(events, 6))
+                Arguments.of(EventFilter(location = "cinema"), selectEvents(events,2,3)),
+                Arguments.of(EventFilter(location = "theater", isOpenOnly = false), selectEvents(events,4,5)),
+                Arguments.of(EventFilter(eventType = "sport"), selectEvents(events, 0,1)),
+                Arguments.of(EventFilter(eventType = "concert", isOpenOnly = false), selectEvents(events, 6,7)),
+                Arguments.of(EventFilter(eventType = "theater", theaterWriter = "Shake", theaterGenre = "", theaterDuration = null), selectEvents(events, 4)),
+                Arguments.of(EventFilter(eventType = "theater", theaterWriter = "", theaterGenre = "Tragedy", theaterDuration = null), selectEvents(events, 4)),
+                Arguments.of(EventFilter(eventType = "theater", theaterWriter = "", theaterGenre = "", theaterDuration = 150), selectEvents(events, 4)),
+                Arguments.of(EventFilter(eventType = "theater", theaterWriter = "DNE", theaterGenre = "", theaterDuration = null), noEvents),
+                Arguments.of(EventFilter(eventType = "theater", theaterWriter = "", theaterGenre = "DNE", theaterDuration = null), noEvents),
+                Arguments.of(EventFilter(eventType = "theater", theaterWriter = "", theaterGenre = "", theaterDuration = 999), noEvents),
+                Arguments.of(EventFilter(eventType = "sport", sportType = "Basketball", sportHomeTeam = "", sportVisitingTeam = "", sportLeague = ""), selectEvents(events, 1)),
+                Arguments.of(EventFilter(eventType = "sport", sportType = "", sportHomeTeam = "C", sportVisitingTeam = "", sportLeague = ""), selectEvents(events, 1)),
+                Arguments.of(EventFilter(eventType = "sport", sportType = "", sportHomeTeam = "", sportVisitingTeam = "D", sportLeague = ""), selectEvents(events, 1)),
+                Arguments.of(EventFilter(eventType = "sport", sportType = "", sportHomeTeam = "", sportVisitingTeam = "", sportLeague = "NBA"), selectEvents(events, 1)),
+                Arguments.of(EventFilter(eventType = "sport", sportType = "DNE", sportHomeTeam = "", sportVisitingTeam = "", sportLeague = ""), noEvents),
+                Arguments.of(EventFilter(eventType = "sport", sportType = "", sportHomeTeam = "DNE", sportVisitingTeam = "", sportLeague = ""), noEvents),
+                Arguments.of(EventFilter(eventType = "sport", sportType = "", sportHomeTeam = "", sportVisitingTeam = "DNE", sportLeague = ""), noEvents),
+                Arguments.of(EventFilter(eventType = "sport", sportType = "", sportHomeTeam = "", sportVisitingTeam = "", sportLeague = "DNE"), noEvents),
+                Arguments.of(EventFilter(eventType = "film", filmDirector = "Nolan", filmRuntime = null, filmRating = null, filmGenre = ""), selectEvents(events, 3)),
+                Arguments.of(EventFilter(eventType = "film", filmDirector = "", filmRuntime = 145, filmRating = null, filmGenre = ""), selectEvents(events, 2, 3)),
+                Arguments.of(EventFilter(eventType = "film", filmDirector = "", filmRuntime = null, filmRating = 5, filmGenre = ""), selectEvents(events, 3)),
+                Arguments.of(EventFilter(eventType = "film", filmDirector = "", filmRuntime = null, filmRating = null, filmGenre = "sci-fi"), selectEvents(events, 3)),
+                Arguments.of(EventFilter(eventType = "film", filmDirector = "DNE", filmRuntime = null, filmRating = null, filmGenre = ""), noEvents),
+                Arguments.of(EventFilter(eventType = "film", filmDirector = "", filmRuntime = -999, filmRating = null, filmGenre = ""), noEvents),
+                Arguments.of(EventFilter(eventType = "film", filmDirector = "", filmRuntime = null, filmRating = -99, filmGenre = ""), noEvents),
+                Arguments.of(EventFilter(eventType = "film", filmDirector = "", filmRuntime = null, filmRating = null, filmGenre = "DNE"), noEvents),
+                Arguments.of(EventFilter(eventType = "concert", concertMainArtist = "Rock band", concertGenre = ""), selectEvents(events, 6)),
+                Arguments.of(EventFilter(eventType = "concert", concertMainArtist = "", concertGenre = "rock"), selectEvents(events, 6)),
+                Arguments.of(EventFilter(eventType = "concert", concertMainArtist = "DNE", concertGenre = ""), noEvents),
+                Arguments.of(EventFilter(eventType = "concert", concertMainArtist = "", concertGenre = "DNE"), noEvents)
             )
         }
     }
